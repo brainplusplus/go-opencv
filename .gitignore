@@ -1,0 +1,51 @@
+# Build artifacts
+*.obj
+*.exp
+*.lib
+*.o
+*.pdb
+*.ilk
+
+# Dist (DLL is embedded via go:embed — source is built from build-tools/)
+# Uncomment to exclude the DLL from git (large binary):
+# dist/goopencv.dll
+dist/goopencv.so
+dist/goopencv.dylib
+
+# Build WASI output
+build-wasi/
+
+# opencv-mobile SDK (large zip, extracted dir)
+build-tools/opencv-mobile-4.13.0-windows-vs2022/
+build-tools/opencv-mobile-*.zip
+
+# References (internal design docs, not for public)
+references/
+
+# Go test binary
+*.test
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Go
+vendor/
+
+# Examples output
+examples/output_*.png
+
+# Context files (local AI session state)
+.opencode-context.md
+.opencode-context-archive.md
+.opencode-jce/
+
+# Generated SDK notes
+sdk-notes.md

@@ -1,0 +1,89 @@
+name: Build Native Libraries
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'backend/goopencv_abi.cpp'
+      - 'build-tools/build-goopencv.*'
+      - '.github/workflows/build-native.yml'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'OpenCV mobile version'
+        default: '4.13.0'
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    name: Windows amd64
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download opencv-mobile
+        shell: pwsh
+        run: |
+          $zip = "opencv-mobile-4.13.0-windows-vs2022.zip"
+          $url = "https://github.com/nihui/opencv-mobile/releases/latest/download/$zip"
+          Invoke-WebRequest -Uri $url -OutFile "build-tools/$zip"
+          Expand-Archive "build-tools/$zip" -DestinationPath "build-tools/"
+          Remove-Item "build-tools/$zip"
+
+      - name: Build goopencv.dll
+        shell: cmd
+        run: build-tools\build-goopencv.bat
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: goopencv-windows-amd64
+          path: dist/goopencv.dll
+          compression-level: 0
+
+  build-linux:
+    name: Linux amd64
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download opencv-mobile
+        run: |
+          wget -q https://github.com/nihui/opencv-mobile/releases/latest/download/opencv-mobile-4.13.0-ubuntu-2204.zip -O /tmp/opencv-mobile.zip
+          unzip -q /tmp/opencv-mobile.zip -d build-tools/
+          rm /tmp/opencv-mobile.zip
+
+      - name: Build goopencv.so
+        run: bash build-tools/build-goopencv-linux.sh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: goopencv-linux-amd64
+          path: dist/goopencv.so
+          compression-level: 0
+
+  build-macos:
+    name: macOS arm64
+    runs-on: macos-14  # Apple Silicon runner
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download opencv-mobile
+        run: |
+          wget -q https://github.com/nihui/opencv-mobile/releases/latest/download/opencv-mobile-4.13.0-macos.zip -O /tmp/opencv-mobile.zip
+          unzip -q /tmp/opencv-mobile.zip -d build-tools/
+          rm /tmp/opencv-mobile.zip
+
+      - name: Build goopencv.dylib
+        run: bash build-tools/build-goopencv-macos.sh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: goopencv-macos-arm64
+          path: dist/goopencv.dylib
+          compression-level: 0
