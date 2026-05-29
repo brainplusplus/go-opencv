@@ -1391,13 +1391,16 @@ func (b *PuregoBackend) ImShow(_ context.Context, winname unsafe.Pointer, winnam
 func (b *PuregoBackend) WaitKey(_ context.Context, delay int32) (int32, error) {
 	if b.waitKey == nil { return -1, errNotSupported("wait_key") }
 	r := b.waitKey(delay)
-	if r < 0 { return r, fmt.Errorf("wait_key: no key pressed or error") }
+	if r == int32(abi.ErrUnsupported) { return -1, fmt.Errorf("wait_key: not available in opencv-mobile build") }
+	if r < 0 { return r, fmt.Errorf("wait_key: no key pressed") }
 	return r, nil
 }
 
 func (b *PuregoBackend) DestroyWindow(_ context.Context, winname unsafe.Pointer, winnameLen int32) error {
 	if b.destroyWindow == nil { return errNotSupported("destroy_window") }
-	return errorCode(abi.DestroyWindow, abi.ErrorCode(b.destroyWindow(winname, winnameLen)))
+	ec := b.destroyWindow(winname, winnameLen)
+	if ec == int32(abi.ErrUnsupported) { return fmt.Errorf("destroy_window: not available in opencv-mobile build") }
+	return errorCode(abi.DestroyWindow, abi.ErrorCode(ec))
 }
 
 // ---------------------------------------------------------------------------

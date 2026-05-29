@@ -1474,16 +1474,16 @@ extern "C" ABI_EXPORT int32_t goopencv_highgui_imshow(const char* winname, int32
 }
 
 extern "C" ABI_EXPORT int32_t goopencv_highgui_wait_key(int32_t delay) {
-    // opencv-mobile does not include waitKey — return -1 (no key)
+    // opencv-mobile does not include waitKey — always returns ERR_UNSUPPORTED
     (void)delay;
-    return -1;
+    return ERR_UNSUPPORTED;
 }
 
 extern "C" ABI_EXPORT int32_t goopencv_highgui_destroy_window(const char* winname, int32_t winname_len) {
-    // opencv-mobile does not include destroyWindow — no-op
+    // opencv-mobile does not include destroyWindow — always returns ERR_UNSUPPORTED
     (void)winname;
     (void)winname_len;
-    return OK;
+    return ERR_UNSUPPORTED;
 }
 
 // ===========================================================================
