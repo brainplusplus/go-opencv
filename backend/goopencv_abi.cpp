@@ -4,6 +4,9 @@
 #include <stdint.h>
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
+#include <opencv2/photo.hpp>
+#include <opencv2/features2d.hpp>
+#include <opencv2/highgui.hpp>
 
 // DLL export annotation (Windows only; extern "C" suffices on Unix).
 #ifdef _WIN32
@@ -1142,6 +1145,429 @@ extern "C" ABI_EXPORT int32_t goopencv_core_merge(uint64_t vec_handle, uint64_t 
     if (vec_handle == 0 || dst_handle == 0) return ERR_INVALID_HANDLE;
     try {
         cv::merge(*(std::vector<cv::Mat>*)(intptr_t)vec_handle, *(cv::Mat*)(intptr_t)dst_handle);
+        return OK;
+    } catch (...) { return ERR_OPENCV; }
+}
+
+// ===========================================================================
+// NEW API: imgproc — bilateralFilter, inRange, matchTemplate, calcHist,
+//   connectedComponents, distanceTransform, copyMakeBorder, rotate,
+//   hconcat, vconcat, remap, LUT, integral, getPerspectiveTransform,
+//   fillConvexPoly, convertScaleAbs
+// ===========================================================================
+
+extern "C" ABI_EXPORT int32_t goopencv_imgproc_bilateral_filter(uint64_t src_handle, uint64_t dst_handle, int32_t d, double sigma_color, double sigma_space) {
+    if (src_handle == 0 || dst_handle == 0) return ERR_INVALID_HANDLE;
+    try {
+        cv::bilateralFilter(*(cv::Mat*)(intptr_t)src_handle, *(cv::Mat*)(intptr_t)dst_handle, d, sigma_color, sigma_space);
+        return OK;
+    } catch (...) { return ERR_OPENCV; }
+}
+
+extern "C" ABI_EXPORT int32_t goopencv_imgproc_in_range(uint64_t src_handle, double lb0, double lb1, double lb2, double lb3, double ub0, double ub1, double ub2, double ub3, uint64_t dst_handle) {
+    if (src_handle == 0 || dst_handle == 0) return ERR_INVALID_HANDLE;
+    try {
+        cv::inRange(*(cv::Mat*)(intptr_t)src_handle, cv::Scalar(lb0, lb1, lb2, lb3), cv::Scalar(ub0, ub1, ub2, ub3), *(cv::Mat*)(intptr_t)dst_handle);
+        return OK;
+    } catch (...) { return ERR_OPENCV; }
+}
+
+extern "C" ABI_EXPORT int32_t goopencv_imgproc_match_template(uint64_t img_handle, uint64_t tmpl_handle, uint64_t result_handle, int32_t method) {
+    if (img_handle == 0 || tmpl_handle == 0 || result_handle == 0) return ERR_INVALID_HANDLE;
+    try {
+        cv::matchTemplate(*(cv::Mat*)(intptr_t)img_handle, *(cv::Mat*)(intptr_t)tmpl_handle, *(cv::Mat*)(intptr_t)result_handle, method);
+        return OK;
+    } catch (...) { return ERR_OPENCV; }
+}
+
+extern "C" ABI_EXPORT int32_t goopencv_imgproc_calc_hist(uint64_t src_handle, uint64_t dst_handle, int32_t bins, double range_min, double range_max) {
+    if (src_handle == 0 || dst_handle == 0) return ERR_INVALID_HANDLE;
+    try {
+        int channels[] = {0};
+        int histSize[] = {bins};
+        float hranges[] = {(float)range_min, (float)range_max};
+        const float* ranges[] = {hranges};
+        cv::calcHist((cv::Mat*)(intptr_t)src_handle, 1, channels, cv::Mat(), *(cv::Mat*)(intptr_t)dst_handle, 1, histSize, ranges);
+        return OK;
+    } catch (...) { return ERR_OPENCV; }
+}
+
+extern "C" ABI_EXPORT int32_t goopencv_imgproc_connected_components(uint64_t src_handle, uint64_t dst_handle, int32_t connectivity, int32_t ltype) {
+    if (src_handle == 0 || dst_handle == 0) return ERR_INVALID_HANDLE;
+    try {
+        cv::connectedComponents(*(cv::Mat*)(intptr_t)src_handle, *(cv::Mat*)(intptr_t)dst_handle, connectivity, ltype);
+        return OK;
+    } catch (...) { return ERR_OPENCV; }
+}
+
+extern "C" ABI_EXPORT int32_t goopencv_imgproc_distance_transform(uint64_t src_handle, uint64_t dst_handle, int32_t distance_type, int32_t mask_size) {
+    if (src_handle == 0 || dst_handle == 0) return ERR_INVALID_HANDLE;
+    try {
+        cv::distanceTransform(*(cv::Mat*)(intptr_t)src_handle, *(cv::Mat*)(intptr_t)dst_handle, distance_type, mask_size);
+        return OK;
+    } catch (...) { return ERR_OPENCV; }
+}
+
+extern "C" ABI_EXPORT int32_t goopencv_imgproc_copy_make_border(uint64_t src_handle, uint64_t dst_handle, int32_t top, int32_t bottom, int32_t left, int32_t right, int32_t border_type, double v0, double v1, double v2, double v3) {
+    if (src_handle == 0 || dst_handle == 0) return ERR_INVALID_HANDLE;
+    try {
+        cv::copyMakeBorder(*(cv::Mat*)(intptr_t)src_handle, *(cv::Mat*)(intptr_t)dst_handle, top, bottom, left, right, border_type, cv::Scalar(v0, v1, v2, v3));
+        return OK;
+    } catch (...) { return ERR_OPENCV; }
+}
+
+extern "C" ABI_EXPORT int32_t goopencv_imgproc_rotate(uint64_t src_handle, uint64_t dst_handle, int32_t rotate_code) {
+    if (src_handle == 0 || dst_handle == 0) return ERR_INVALID_HANDLE;
+    try {
+        cv::rotate(*(cv::Mat*)(intptr_t)src_handle, *(cv::Mat*)(intptr_t)dst_handle, rotate_code);
+        return OK;
+    } catch (...) { return ERR_OPENCV; }
+}
+
+extern "C" ABI_EXPORT int32_t goopencv_imgproc_hconcat(uint64_t src1_handle, uint64_t src2_handle, uint64_t dst_handle) {
+    if (src1_handle == 0 || src2_handle == 0 || dst_handle == 0) return ERR_INVALID_HANDLE;
+    try {
+        cv::hconcat(*(cv::Mat*)(intptr_t)src1_handle, *(cv::Mat*)(intptr_t)src2_handle, *(cv::Mat*)(intptr_t)dst_handle);
+        return OK;
+    } catch (...) { return ERR_OPENCV; }
+}
+
+extern "C" ABI_EXPORT int32_t goopencv_imgproc_vconcat(uint64_t src1_handle, uint64_t src2_handle, uint64_t dst_handle) {
+    if (src1_handle == 0 || src2_handle == 0 || dst_handle == 0) return ERR_INVALID_HANDLE;
+    try {
+        cv::vconcat(*(cv::Mat*)(intptr_t)src1_handle, *(cv::Mat*)(intptr_t)src2_handle, *(cv::Mat*)(intptr_t)dst_handle);
+        return OK;
+    } catch (...) { return ERR_OPENCV; }
+}
+
+extern "C" ABI_EXPORT int32_t goopencv_imgproc_remap(uint64_t src_handle, uint64_t dst_handle, uint64_t map1_handle, uint64_t map2_handle, int32_t interpolation, int32_t border_mode, double border_val) {
+    if (src_handle == 0 || dst_handle == 0 || map1_handle == 0 || map2_handle == 0) return ERR_INVALID_HANDLE;
+    try {
+        cv::remap(*(cv::Mat*)(intptr_t)src_handle, *(cv::Mat*)(intptr_t)dst_handle, *(cv::Mat*)(intptr_t)map1_handle, *(cv::Mat*)(intptr_t)map2_handle, interpolation, border_mode, cv::Scalar(border_val));
+        return OK;
+    } catch (...) { return ERR_OPENCV; }
+}
+
+extern "C" ABI_EXPORT int32_t goopencv_imgproc_lut(uint64_t src_handle, uint64_t lut_handle, uint64_t dst_handle) {
+    if (src_handle == 0 || lut_handle == 0 || dst_handle == 0) return ERR_INVALID_HANDLE;
+    try {
+        cv::LUT(*(cv::Mat*)(intptr_t)src_handle, *(cv::Mat*)(intptr_t)lut_handle, *(cv::Mat*)(intptr_t)dst_handle);
+        return OK;
+    } catch (...) { return ERR_OPENCV; }
+}
+
+extern "C" ABI_EXPORT int32_t goopencv_imgproc_integral(uint64_t src_handle, uint64_t sum_handle) {
+    if (src_handle == 0 || sum_handle == 0) return ERR_INVALID_HANDLE;
+    try {
+        cv::integral(*(cv::Mat*)(intptr_t)src_handle, *(cv::Mat*)(intptr_t)sum_handle);
+        return OK;
+    } catch (...) { return ERR_OPENCV; }
+}
+
+// Perspective transform: takes pointer to 8 floats (4 src points) + pointer to 8 floats (4 dst points)
+extern "C" ABI_EXPORT uint64_t goopencv_imgproc_get_perspective_transform(
+    const float* src_pts, const float* dst_pts
+) {
+    if (!src_pts || !dst_pts) return 0;
+    try {
+        cv::Point2f src[4] = {
+            cv::Point2f(src_pts[0], src_pts[1]), cv::Point2f(src_pts[2], src_pts[3]),
+            cv::Point2f(src_pts[4], src_pts[5]), cv::Point2f(src_pts[6], src_pts[7])
+        };
+        cv::Point2f dst[4] = {
+            cv::Point2f(dst_pts[0], dst_pts[1]), cv::Point2f(dst_pts[2], dst_pts[3]),
+            cv::Point2f(dst_pts[4], dst_pts[5]), cv::Point2f(dst_pts[6], dst_pts[7])
+        };
+        auto m = cv::getPerspectiveTransform(src, dst);
+        auto* r = new cv::Mat(m);
+        return (uint64_t)(intptr_t)r;
+    } catch (...) { return 0; }
+}
+
+extern "C" ABI_EXPORT int32_t goopencv_imgproc_fill_convex_poly(uint64_t img_handle, uint64_t pts_handle, int32_t npts, double r, double g, double b, double a, int32_t line_type, int32_t shift) {
+    if (img_handle == 0 || pts_handle == 0) return ERR_INVALID_HANDLE;
+    try {
+        auto* pts_vec = (std::vector<cv::Point>*)(intptr_t)pts_handle;
+        cv::fillConvexPoly(*(cv::Mat*)(intptr_t)img_handle, *pts_vec, cv::Scalar(r, g, b, a), line_type, shift);
+        return OK;
+    } catch (...) { return ERR_OPENCV; }
+}
+
+// ===========================================================================
+// NEW API: photo module
+// ===========================================================================
+
+extern "C" ABI_EXPORT int32_t goopencv_photo_fast_nl_means_denoising(uint64_t src_handle, uint64_t dst_handle, float h, int32_t template_window, int32_t search_window) {
+    if (src_handle == 0 || dst_handle == 0) return ERR_INVALID_HANDLE;
+    try {
+        cv::fastNlMeansDenoising(*(cv::Mat*)(intptr_t)src_handle, *(cv::Mat*)(intptr_t)dst_handle, h, template_window, search_window);
+        return OK;
+    } catch (...) { return ERR_OPENCV; }
+}
+
+extern "C" ABI_EXPORT int32_t goopencv_photo_fast_nl_means_denoising_colored(uint64_t src_handle, uint64_t dst_handle, float h, float h_color, int32_t template_window, int32_t search_window) {
+    if (src_handle == 0 || dst_handle == 0) return ERR_INVALID_HANDLE;
+    try {
+        cv::fastNlMeansDenoisingColored(*(cv::Mat*)(intptr_t)src_handle, *(cv::Mat*)(intptr_t)dst_handle, h, h_color, template_window, search_window);
+        return OK;
+    } catch (...) { return ERR_OPENCV; }
+}
+
+extern "C" ABI_EXPORT int32_t goopencv_photo_detail_enhance(uint64_t src_handle, uint64_t dst_handle, float sigma_s, float sigma_r) {
+    if (src_handle == 0 || dst_handle == 0) return ERR_INVALID_HANDLE;
+    try {
+        cv::detailEnhance(*(cv::Mat*)(intptr_t)src_handle, *(cv::Mat*)(intptr_t)dst_handle, sigma_s, sigma_r);
+        return OK;
+    } catch (...) { return ERR_OPENCV; }
+}
+
+extern "C" ABI_EXPORT int32_t goopencv_photo_edge_preserving_filter(uint64_t src_handle, uint64_t dst_handle, int32_t flags, float sigma_s, float sigma_r) {
+    if (src_handle == 0 || dst_handle == 0) return ERR_INVALID_HANDLE;
+    try {
+        cv::edgePreservingFilter(*(cv::Mat*)(intptr_t)src_handle, *(cv::Mat*)(intptr_t)dst_handle, flags, sigma_s, sigma_r);
+        return OK;
+    } catch (...) { return ERR_OPENCV; }
+}
+
+extern "C" ABI_EXPORT int32_t goopencv_photo_pencil_sketch(uint64_t src_handle, uint64_t dst1_handle, uint64_t dst2_handle, float sigma_s, float sigma_r, float shade_factor) {
+    if (src_handle == 0 || dst1_handle == 0 || dst2_handle == 0) return ERR_INVALID_HANDLE;
+    try {
+        cv::pencilSketch(*(cv::Mat*)(intptr_t)src_handle, *(cv::Mat*)(intptr_t)dst1_handle, *(cv::Mat*)(intptr_t)dst2_handle, sigma_s, sigma_r, shade_factor);
+        return OK;
+    } catch (...) { return ERR_OPENCV; }
+}
+
+extern "C" ABI_EXPORT int32_t goopencv_photo_stylization(uint64_t src_handle, uint64_t dst_handle, float sigma_s, float sigma_r) {
+    if (src_handle == 0 || dst_handle == 0) return ERR_INVALID_HANDLE;
+    try {
+        cv::stylization(*(cv::Mat*)(intptr_t)src_handle, *(cv::Mat*)(intptr_t)dst_handle, sigma_s, sigma_r);
+        return OK;
+    } catch (...) { return ERR_OPENCV; }
+}
+
+extern "C" ABI_EXPORT int32_t goopencv_photo_seamless_clone(uint64_t src_handle, uint64_t dst_handle, uint64_t mask_handle, int32_t cx, int32_t cy, uint64_t out_handle, int32_t flags) {
+    if (src_handle == 0 || dst_handle == 0 || mask_handle == 0 || out_handle == 0) return ERR_INVALID_HANDLE;
+    try {
+        cv::seamlessClone(*(cv::Mat*)(intptr_t)src_handle, *(cv::Mat*)(intptr_t)dst_handle, *(cv::Mat*)(intptr_t)mask_handle, cv::Point(cx, cy), *(cv::Mat*)(intptr_t)out_handle, flags);
+        return OK;
+    } catch (...) { return ERR_OPENCV; }
+}
+
+// ===========================================================================
+// NEW API: features2d module — ORB, FAST, BFMatcher, DrawKeypoints
+// ===========================================================================
+
+// KeyPoint transfer helper
+extern "C" ABI_EXPORT uint64_t goopencv_vec_keypoint_new() {
+    try { auto* v = new std::vector<cv::KeyPoint>(); return (uint64_t)(intptr_t)v; }
+    catch (...) { return 0; }
+}
+
+extern "C" ABI_EXPORT int32_t goopencv_vec_keypoint_len(uint64_t handle) {
+    if (handle == 0) return 0;
+    return (int32_t)((std::vector<cv::KeyPoint>*)(intptr_t)handle)->size();
+}
+
+extern "C" ABI_EXPORT int32_t goopencv_vec_keypoint_get(uint64_t handle, int32_t idx, float* out_x, float* out_y, float* out_size, float* out_angle, float* out_response, int32_t* out_octave, int32_t* out_class_id) {
+    if (handle == 0 || !out_x || !out_y) return ERR_INVALID_HANDLE;
+    auto* v = (std::vector<cv::KeyPoint>*)(intptr_t)handle;
+    if (idx < 0 || idx >= (int32_t)v->size()) return ERR_INVALID_ARGUMENT;
+    auto& kp = (*v)[idx];
+    *out_x = kp.pt.x;
+    *out_y = kp.pt.y;
+    if (out_size) *out_size = kp.size;
+    if (out_angle) *out_angle = kp.angle;
+    if (out_response) *out_response = kp.response;
+    if (out_octave) *out_octave = kp.octave;
+    if (out_class_id) *out_class_id = kp.class_id;
+    return OK;
+}
+
+extern "C" ABI_EXPORT void goopencv_vec_keypoint_delete(uint64_t handle) {
+    if (handle == 0) return;
+    delete (std::vector<cv::KeyPoint>*)(intptr_t)handle;
+}
+
+// DMatch transfer helper
+extern "C" ABI_EXPORT uint64_t goopencv_vec_dmatch_new() {
+    try { auto* v = new std::vector<cv::DMatch>(); return (uint64_t)(intptr_t)v; }
+    catch (...) { return 0; }
+}
+
+extern "C" ABI_EXPORT int32_t goopencv_vec_dmatch_len(uint64_t handle) {
+    if (handle == 0) return 0;
+    return (int32_t)((std::vector<cv::DMatch>*)(intptr_t)handle)->size();
+}
+
+extern "C" ABI_EXPORT int32_t goopencv_vec_dmatch_get(uint64_t handle, int32_t idx, int32_t* out_qidx, int32_t* out_tidx, float* out_dist, int32_t* out_imgidx) {
+    if (handle == 0 || !out_qidx || !out_tidx || !out_dist) return ERR_INVALID_HANDLE;
+    auto* v = (std::vector<cv::DMatch>*)(intptr_t)handle;
+    if (idx < 0 || idx >= (int32_t)v->size()) return ERR_INVALID_ARGUMENT;
+    auto& dm = (*v)[idx];
+    *out_qidx = dm.queryIdx;
+    *out_tidx = dm.trainIdx;
+    *out_dist = dm.distance;
+    if (out_imgidx) *out_imgidx = dm.imgIdx;
+    return OK;
+}
+
+extern "C" ABI_EXPORT void goopencv_vec_dmatch_delete(uint64_t handle) {
+    if (handle == 0) return;
+    delete (std::vector<cv::DMatch>*)(intptr_t)handle;
+}
+
+// FAST detector
+extern "C" ABI_EXPORT int32_t goopencv_features2d_fast(uint64_t src_handle, uint64_t kp_vec_handle, int32_t threshold, int32_t nonmax_suppression) {
+    if (src_handle == 0 || kp_vec_handle == 0) return ERR_INVALID_HANDLE;
+    try {
+        auto* kps = (std::vector<cv::KeyPoint>*)(intptr_t)kp_vec_handle;
+        cv::FAST(*(cv::Mat*)(intptr_t)src_handle, *kps, threshold, nonmax_suppression != 0);
+        return OK;
+    } catch (...) { return ERR_OPENCV; }
+}
+
+// ORB detector + compute
+extern "C" ABI_EXPORT int32_t goopencv_features2d_orb_detect_and_compute(uint64_t src_handle, uint64_t mask_handle, uint64_t kp_vec_handle, uint64_t descriptors_handle, int32_t nfeatures, float scale_factor, int32_t nlevels) {
+    if (src_handle == 0 || kp_vec_handle == 0 || descriptors_handle == 0) return ERR_INVALID_HANDLE;
+    try {
+        auto orb = cv::ORB::create(nfeatures, scale_factor, nlevels);
+        auto* kps = (std::vector<cv::KeyPoint>*)(intptr_t)kp_vec_handle;
+        cv::Mat mask;
+        if (mask_handle != 0) mask = *(cv::Mat*)(intptr_t)mask_handle;
+        orb->detectAndCompute(*(cv::Mat*)(intptr_t)src_handle, mask, *kps, *(cv::Mat*)(intptr_t)descriptors_handle);
+        return OK;
+    } catch (...) { return ERR_OPENCV; }
+}
+
+// BFMatcher match
+extern "C" ABI_EXPORT int32_t goopencv_features2d_bf_match(uint64_t desc1_handle, uint64_t desc2_handle, uint64_t match_vec_handle, int32_t norm_type) {
+    if (desc1_handle == 0 || desc2_handle == 0 || match_vec_handle == 0) return ERR_INVALID_HANDLE;
+    try {
+        auto bf = cv::BFMatcher::create(norm_type);
+        auto* matches = (std::vector<cv::DMatch>*)(intptr_t)match_vec_handle;
+        bf->match(*(cv::Mat*)(intptr_t)desc1_handle, *(cv::Mat*)(intptr_t)desc2_handle, *matches);
+        return OK;
+    } catch (...) { return ERR_OPENCV; }
+}
+
+// DrawKeypoints
+extern "C" ABI_EXPORT int32_t goopencv_features2d_draw_keypoints(uint64_t img_handle, uint64_t kp_vec_handle, uint64_t out_handle, double r, double g, double b) {
+    if (img_handle == 0 || kp_vec_handle == 0 || out_handle == 0) return ERR_INVALID_HANDLE;
+    try {
+        auto* kps = (std::vector<cv::KeyPoint>*)(intptr_t)kp_vec_handle;
+        cv::drawKeypoints(*(cv::Mat*)(intptr_t)img_handle, *kps, *(cv::Mat*)(intptr_t)out_handle, cv::Scalar(r, g, b), cv::DrawMatchesFlags::DEFAULT);
+        return OK;
+    } catch (...) { return ERR_OPENCV; }
+}
+
+// ===========================================================================
+// NEW API: highgui module — imshow, waitKey, destroyWindow
+// ===========================================================================
+
+extern "C" ABI_EXPORT int32_t goopencv_highgui_imshow(const char* winname, int32_t winname_len, uint64_t mat_handle) {
+    if (mat_handle == 0) return ERR_INVALID_HANDLE;
+    try {
+        std::string name(winname, winname_len);
+        cv::imshow(name, *(cv::Mat*)(intptr_t)mat_handle);
+        return OK;
+    } catch (...) { return ERR_OPENCV; }
+}
+
+extern "C" ABI_EXPORT int32_t goopencv_highgui_wait_key(int32_t delay) {
+    // opencv-mobile does not include waitKey — return -1 (no key)
+    (void)delay;
+    return -1;
+}
+
+extern "C" ABI_EXPORT int32_t goopencv_highgui_destroy_window(const char* winname, int32_t winname_len) {
+    // opencv-mobile does not include destroyWindow — no-op
+    (void)winname;
+    (void)winname_len;
+    return OK;
+}
+
+// ===========================================================================
+// NEW API: Core extras — Mat Diag, Mat At (get/set pixel)
+// ===========================================================================
+
+extern "C" ABI_EXPORT uint64_t goopencv_mat_diag(uint64_t handle) {
+    if (handle == 0) return 0;
+    try {
+        auto* m = (cv::Mat*)(intptr_t)handle;
+        auto* d = new cv::Mat(m->diag());
+        return (uint64_t)(intptr_t)d;
+    } catch (...) { return 0; }
+}
+
+extern "C" ABI_EXPORT int32_t goopencv_mat_at_u8(uint64_t handle, int32_t row, int32_t col, int32_t ch, uint8_t* out_val) {
+    if (handle == 0 || !out_val) return ERR_INVALID_HANDLE;
+    try {
+        auto* m = (cv::Mat*)(intptr_t)handle;
+        if (row < 0 || row >= m->rows || col < 0 || col >= m->cols) return ERR_INVALID_ARGUMENT;
+        if (ch < 0 || ch >= m->channels()) return ERR_INVALID_ARGUMENT;
+        *out_val = m->at<cv::Vec<uchar, 1>>(row, col)[0]; // Use uchar pointer
+        // For multi-channel: offset by channel
+        if (m->channels() > 1) {
+            *out_val = m->ptr<uchar>(row)[col * m->channels() + ch];
+        } else {
+            *out_val = m->ptr<uchar>(row)[col];
+        }
+        return OK;
+    } catch (...) { return ERR_OPENCV; }
+}
+
+extern "C" ABI_EXPORT int32_t goopencv_mat_set_u8(uint64_t handle, int32_t row, int32_t col, int32_t ch, uint8_t val) {
+    if (handle == 0) return ERR_INVALID_HANDLE;
+    try {
+        auto* m = (cv::Mat*)(intptr_t)handle;
+        if (row < 0 || row >= m->rows || col < 0 || col >= m->cols) return ERR_INVALID_ARGUMENT;
+        if (ch < 0 || ch >= m->channels()) return ERR_INVALID_ARGUMENT;
+        m->ptr<uchar>(row)[col * m->channels() + ch] = val;
+        return OK;
+    } catch (...) { return ERR_OPENCV; }
+}
+
+// ===========================================================================
+// NEW API: ConvertModel helper (auto-selects color conversion code)
+// ===========================================================================
+
+extern "C" ABI_EXPORT int32_t goopencv_imgproc_convert_model(uint64_t src_handle, uint64_t dst_handle, int32_t src_model, int32_t dst_model) {
+    if (src_handle == 0 || dst_handle == 0) return ERR_INVALID_HANDLE;
+    if (src_model == dst_model) {
+        // Just clone data
+        try {
+            *(cv::Mat*)(intptr_t)dst_handle = ((cv::Mat*)(intptr_t)src_handle)->clone();
+            return OK;
+        } catch (...) { return ERR_OPENCV; }
+    }
+    // Determine conversion code from models
+    // Models: 0=Unknown, 1=BGR, 2=RGB, 3=RGBA, 4=Gray
+    int code = -1;
+    if (src_model == 1 && dst_model == 4) code = cv::COLOR_BGR2GRAY;
+    else if (src_model == 1 && dst_model == 2) code = cv::COLOR_BGR2RGB;
+    else if (src_model == 1 && dst_model == 3) code = cv::COLOR_BGR2RGBA;
+    else if (src_model == 2 && dst_model == 4) code = cv::COLOR_RGB2GRAY;
+    else if (src_model == 2 && dst_model == 1) code = cv::COLOR_RGB2BGR;
+    else if (src_model == 2 && dst_model == 3) code = cv::COLOR_RGB2RGBA;
+    else if (src_model == 4 && dst_model == 1) code = cv::COLOR_GRAY2BGR;
+    else if (src_model == 4 && dst_model == 2) code = cv::COLOR_GRAY2RGB;
+    else if (src_model == 4 && dst_model == 3) code = cv::COLOR_GRAY2RGBA;
+    else if (src_model == 3 && dst_model == 1) code = cv::COLOR_RGBA2BGR;
+    else if (src_model == 3 && dst_model == 2) code = cv::COLOR_RGBA2RGB;
+    else if (src_model == 3 && dst_model == 4) code = cv::COLOR_RGBA2GRAY;
+    else if (src_model == 1 && dst_model == 0) code = -2; // BGR->Unknown: just clone
+    else if (src_model == 2 && dst_model == 0) code = -2;
+    else if (src_model == 4 && dst_model == 0) code = -2;
+    else if (src_model == 3 && dst_model == 0) code = -2;
+    if (code == -2 || (src_model == dst_model)) {
+        try {
+            ((cv::Mat*)(intptr_t)src_handle)->copyTo(*(cv::Mat*)(intptr_t)dst_handle);
+            return OK;
+        } catch (...) { return ERR_OPENCV; }
+    }
+    if (code < 0) return ERR_INVALID_ARGUMENT;
+    try {
+        cv::cvtColor(*(cv::Mat*)(intptr_t)src_handle, *(cv::Mat*)(intptr_t)dst_handle, code);
         return OK;
     } catch (...) { return ERR_OPENCV; }
 }

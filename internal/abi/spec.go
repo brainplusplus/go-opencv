@@ -117,6 +117,61 @@ const (
 	VecLenMat    = "goopencv_vec_mat_len"
 	VecGetMat    = "goopencv_vec_mat_get"
 	VecDeleteMat = "goopencv_vec_mat_delete"
+
+	// New imgproc
+	BilateralFilter      = "goopencv_imgproc_bilateral_filter"
+	InRange              = "goopencv_imgproc_in_range"
+	MatchTemplate        = "goopencv_imgproc_match_template"
+	CalcHistABI          = "goopencv_imgproc_calc_hist"
+	ConnectedComponents  = "goopencv_imgproc_connected_components"
+	DistanceTransform    = "goopencv_imgproc_distance_transform"
+	CopyMakeBorder       = "goopencv_imgproc_copy_make_border"
+	Rotate               = "goopencv_imgproc_rotate"
+	Hconcat              = "goopencv_imgproc_hconcat"
+	Vconcat              = "goopencv_imgproc_vconcat"
+	Remap                = "goopencv_imgproc_remap"
+	LUT                  = "goopencv_imgproc_lut"
+	Integral             = "goopencv_imgproc_integral"
+	GetPerspectiveTransform = "goopencv_imgproc_get_perspective_transform"
+	FillConvexPoly       = "goopencv_imgproc_fill_convex_poly"
+	ConvertModel         = "goopencv_imgproc_convert_model"
+
+	// Photo
+	FastNlMeansDenoising        = "goopencv_photo_fast_nl_means_denoising"
+	FastNlMeansDenoisingColored = "goopencv_photo_fast_nl_means_denoising_colored"
+	DetailEnhance               = "goopencv_photo_detail_enhance"
+	EdgePreservingFilter        = "goopencv_photo_edge_preserving_filter"
+	PencilSketch                = "goopencv_photo_pencil_sketch"
+	Stylization                 = "goopencv_photo_stylization"
+	SeamlessClone               = "goopencv_photo_seamless_clone"
+
+	// Features2d
+	FAST             = "goopencv_features2d_fast"
+	ORBDetectCompute = "goopencv_features2d_orb_detect_and_compute"
+	BFMatch          = "goopencv_features2d_bf_match"
+	DrawKeypoints    = "goopencv_features2d_draw_keypoints"
+
+	// Highgui
+	ImShow         = "goopencv_highgui_imshow"
+	WaitKey        = "goopencv_highgui_wait_key"
+	DestroyWindow  = "goopencv_highgui_destroy_window"
+
+	// Core extras
+	MatDiag  = "goopencv_mat_diag"
+	MatAtU8  = "goopencv_mat_at_u8"
+	MatSetU8 = "goopencv_mat_set_u8"
+
+	// Vector helpers — keypoints
+	VecNewKeypoint    = "goopencv_vec_keypoint_new"
+	VecLenKeypoint    = "goopencv_vec_keypoint_len"
+	VecGetKeypoint    = "goopencv_vec_keypoint_get"
+	VecDeleteKeypoint = "goopencv_vec_keypoint_delete"
+
+	// Vector helpers — dmatch
+	VecNewDMatch    = "goopencv_vec_dmatch_new"
+	VecLenDMatch    = "goopencv_vec_dmatch_len"
+	VecGetDMatch    = "goopencv_vec_dmatch_get"
+	VecDeleteDMatch = "goopencv_vec_dmatch_delete"
 )
 
 type Handle uint64

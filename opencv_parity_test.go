@@ -931,3 +931,566 @@ func newTestRuntime(t *testing.T) *Runtime {
 	}
 	return r
 }
+
+// ---------------------------------------------------------------------------
+// Batch 5: New imgproc APIs (BilateralFilter, InRange, Rotate, Hconcat, Vconcat, etc.)
+// ---------------------------------------------------------------------------
+
+func TestDLLBilateralFilter(t *testing.T) {
+	r := newTestRuntime(t)
+	defer r.Close()
+
+	src, err := r.NewMat(50, 50, CV8UC3)
+	if err != nil { t.Fatalf("NewMat: %v", err) }
+	defer src.Close()
+
+	dst, err := r.BilateralFilter(src, 5, 50, 50)
+	if err != nil { t.Fatalf("BilateralFilter: %v", err) }
+	defer dst.Close()
+
+	rows, _ := dst.Rows()
+	cols, _ := dst.Cols()
+	if rows != 50 || cols != 50 {
+		t.Errorf("BilateralFilter dims = %dx%d, want 50x50", rows, cols)
+	}
+	m, _ := dst.ColorModel()
+	if m != BGR { t.Errorf("model = %v, want BGR", m) }
+}
+
+func TestDLLInRange(t *testing.T) {
+	r := newTestRuntime(t)
+	defer r.Close()
+
+	src, err := r.NewMat(100, 100, CV8UC3)
+	if err != nil { t.Fatalf("NewMat: %v", err) }
+	defer src.Close()
+
+	lower := Scalar{V0: 100, V1: 0, V2: 0, V3: 0}
+	upper := Scalar{V0: 255, V1: 100, V2: 100, V3: 255}
+	dst, err := r.InRange(src, lower, upper)
+	if err != nil { t.Fatalf("InRange: %v", err) }
+	defer dst.Close()
+
+	rows, _ := dst.Rows()
+	cols, _ := dst.Cols()
+	if rows != 100 || cols != 100 {
+		t.Errorf("InRange dims = %dx%d, want 100x100", rows, cols)
+	}
+	ch, _ := dst.Channels()
+	if ch != 1 { t.Errorf("InRange channels = %d, want 1", ch) }
+	m, _ := dst.ColorModel()
+	if m != Gray { t.Errorf("model = %v, want Gray", m) }
+}
+
+func TestDLLMatchTemplate(t *testing.T) {
+	r := newTestRuntime(t)
+	defer r.Close()
+
+	img, err := r.NewMat(100, 100, CV8UC3)
+	if err != nil { t.Fatalf("NewMat img: %v", err) }
+	defer img.Close()
+
+	tmpl, err := r.NewMat(20, 20, CV8UC3)
+	if err != nil { t.Fatalf("NewMat tmpl: %v", err) }
+	defer tmpl.Close()
+
+	result, err := r.MatchTemplate(img, tmpl, TMSqDiff)
+	if err != nil { t.Fatalf("MatchTemplate: %v", err) }
+	defer result.Close()
+
+	rows, _ := result.Rows()
+	cols, _ := result.Cols()
+	if rows != 81 || cols != 81 {
+		t.Errorf("MatchTemplate result = %dx%d, want 81x81", rows, cols)
+	}
+}
+
+func TestDLLCalcHist(t *testing.T) {
+	r := newTestRuntime(t)
+	defer r.Close()
+
+	src, err := r.NewMat(100, 100, CV8UC1)
+	if err != nil { t.Fatalf("NewMat: %v", err) }
+	defer src.Close()
+
+	hist, err := r.CalcHist(src, 256, 0, 256)
+	if err != nil { t.Fatalf("CalcHist: %v", err) }
+	defer hist.Close()
+
+	rows, _ := hist.Rows()
+	if rows != 256 { t.Errorf("CalcHist rows = %d, want 256", rows) }
+}
+
+func TestDLLConnectedComponents(t *testing.T) {
+	r := newTestRuntime(t)
+	defer r.Close()
+
+	src, err := r.Zeros(100, 100, CV8UC1)
+	if err != nil { t.Fatalf("Zeros: %v", err) }
+	defer src.Close()
+
+	// Draw two white blobs
+	r.Circle(src, Point{X: 25, Y: 25}, 10, color.Gray{Y: 255}, -1)
+	r.Circle(src, Point{X: 75, Y: 75}, 10, color.Gray{Y: 255}, -1)
+
+	labels, err := r.ConnectedComponents(src, 8)
+	if err != nil { t.Fatalf("ConnectedComponents: %v", err) }
+	defer labels.Close()
+
+	rows, _ := labels.Rows()
+	cols, _ := labels.Cols()
+	if rows != 100 || cols != 100 {
+		t.Errorf("ConnectedComponents dims = %dx%d, want 100x100", rows, cols)
+	}
+}
+
+func TestDLLDistanceTransform(t *testing.T) {
+	r := newTestRuntime(t)
+	defer r.Close()
+
+	src, err := r.Zeros(100, 100, CV8UC1)
+	if err != nil { t.Fatalf("Zeros: %v", err) }
+	defer src.Close()
+
+	r.Circle(src, Point{X: 50, Y: 50}, 30, color.Gray{Y: 255}, -1)
+
+	dst, err := r.DistanceTransform(src, DistL2, 5)
+	if err != nil { t.Fatalf("DistanceTransform: %v", err) }
+	defer dst.Close()
+
+	rows, _ := dst.Rows()
+	cols, _ := dst.Cols()
+	if rows != 100 || cols != 100 {
+		t.Errorf("DistanceTransform dims = %dx%d, want 100x100", rows, cols)
+	}
+}
+
+func TestDLLCopyMakeBorder(t *testing.T) {
+	r := newTestRuntime(t)
+	defer r.Close()
+
+	src, err := r.NewMat(50, 50, CV8UC3)
+	if err != nil { t.Fatalf("NewMat: %v", err) }
+	defer src.Close()
+
+	dst, err := r.CopyMakeBorder(src, 10, 10, 10, 10, BorderConstant, Scalar{})
+	if err != nil { t.Fatalf("CopyMakeBorder: %v", err) }
+	defer dst.Close()
+
+	rows, _ := dst.Rows()
+	cols, _ := dst.Cols()
+	if rows != 70 || cols != 70 {
+		t.Errorf("CopyMakeBorder dims = %dx%d, want 70x70", rows, cols)
+	}
+}
+
+func TestDLLRotate(t *testing.T) {
+	r := newTestRuntime(t)
+	defer r.Close()
+
+	src, err := r.NewMat(100, 200, CV8UC3)
+	if err != nil { t.Fatalf("NewMat: %v", err) }
+	defer src.Close()
+
+	dst, err := r.Rotate(src, Rotate90Clockwise)
+	if err != nil { t.Fatalf("Rotate: %v", err) }
+	defer dst.Close()
+
+	rows, _ := dst.Rows()
+	cols, _ := dst.Cols()
+	if rows != 200 || cols != 100 {
+		t.Errorf("Rotate90 dims = %dx%d, want 200x100", rows, cols)
+	}
+}
+
+func TestDLLHconcat(t *testing.T) {
+	r := newTestRuntime(t)
+	defer r.Close()
+
+	src1, err := r.NewMat(50, 50, CV8UC3)
+	if err != nil { t.Fatalf("NewMat1: %v", err) }
+	defer src1.Close()
+
+	src2, err := r.NewMat(50, 30, CV8UC3)
+	if err != nil { t.Fatalf("NewMat2: %v", err) }
+	defer src2.Close()
+
+	dst, err := r.Hconcat(src1, src2)
+	if err != nil { t.Fatalf("Hconcat: %v", err) }
+	defer dst.Close()
+
+	rows, _ := dst.Rows()
+	cols, _ := dst.Cols()
+	if rows != 50 || cols != 80 {
+		t.Errorf("Hconcat dims = %dx%d, want 50x80", rows, cols)
+	}
+}
+
+func TestDLLVconcat(t *testing.T) {
+	r := newTestRuntime(t)
+	defer r.Close()
+
+	src1, err := r.NewMat(50, 80, CV8UC3)
+	if err != nil { t.Fatalf("NewMat1: %v", err) }
+	defer src1.Close()
+
+	src2, err := r.NewMat(30, 80, CV8UC3)
+	if err != nil { t.Fatalf("NewMat2: %v", err) }
+	defer src2.Close()
+
+	dst, err := r.Vconcat(src1, src2)
+	if err != nil { t.Fatalf("Vconcat: %v", err) }
+	defer dst.Close()
+
+	rows, _ := dst.Rows()
+	cols, _ := dst.Cols()
+	if rows != 80 || cols != 80 {
+		t.Errorf("Vconcat dims = %dx%d, want 80x80", rows, cols)
+	}
+}
+
+func TestDLLLUT(t *testing.T) {
+	r := newTestRuntime(t)
+	defer r.Close()
+
+	src, err := r.NewMat(50, 50, CV8UC1)
+	if err != nil { t.Fatalf("NewMat src: %v", err) }
+	defer src.Close()
+
+	// Create identity LUT (256 entries, CV8UC1)
+	lut, err := r.NewMat(1, 256, CV8UC1)
+	if err != nil { t.Fatalf("NewMat lut: %v", err) }
+	defer lut.Close()
+	for i := 0; i < 256; i++ {
+		lut.SetByte(0, int32(i), 0, uint8(i))
+	}
+
+	dst, err := r.LUT(src, lut)
+	if err != nil { t.Fatalf("LUT: %v", err) }
+	defer dst.Close()
+
+	rows, _ := dst.Rows()
+	cols, _ := dst.Cols()
+	if rows != 50 || cols != 50 {
+		t.Errorf("LUT dims = %dx%d, want 50x50", rows, cols)
+	}
+}
+
+func TestDLLIntegral(t *testing.T) {
+	r := newTestRuntime(t)
+	defer r.Close()
+
+	src, err := r.NewMat(50, 50, CV8UC1)
+	if err != nil { t.Fatalf("NewMat: %v", err) }
+	defer src.Close()
+
+	sum, err := r.Integral(src)
+	if err != nil { t.Fatalf("Integral: %v", err) }
+	defer sum.Close()
+
+	rows, _ := sum.Rows()
+	cols, _ := sum.Cols()
+	if rows != 51 || cols != 51 {
+		t.Errorf("Integral dims = %dx%d, want 51x51", rows, cols)
+	}
+}
+
+func TestDLLGetPerspectiveTransform(t *testing.T) {
+	r := newTestRuntime(t)
+	defer r.Close()
+
+	src := [4]Point{{X: 0, Y: 0}, {X: 100, Y: 0}, {X: 100, Y: 100}, {X: 0, Y: 100}}
+	dst := [4]Point{{X: 10, Y: 10}, {X: 90, Y: 10}, {X: 90, Y: 90}, {X: 10, Y: 90}}
+
+	M, err := r.GetPerspectiveTransform(src, dst)
+	if err != nil { t.Fatalf("GetPerspectiveTransform: %v", err) }
+	defer M.Close()
+
+	rows, _ := M.Rows()
+	cols, _ := M.Cols()
+	if rows != 3 || cols != 3 {
+		t.Errorf("GetPerspectiveTransform dims = %dx%d, want 3x3", rows, cols)
+	}
+}
+
+func TestDLLFillConvexPoly(t *testing.T) {
+	r := newTestRuntime(t)
+	defer r.Close()
+
+	img, err := r.Zeros(100, 100, CV8UC3)
+	if err != nil { t.Fatalf("Zeros: %v", err) }
+	defer img.Close()
+
+	pts := []Point{{X: 50, Y: 10}, {X: 90, Y: 90}, {X: 10, Y: 90}}
+	err = r.FillConvexPoly(img, pts, color.RGBA{0, 255, 0, 255}, Line8)
+	if err != nil { t.Fatalf("FillConvexPoly: %v", err) }
+}
+
+// ---------------------------------------------------------------------------
+// Batch 6: ConvertModel
+// ---------------------------------------------------------------------------
+
+func TestDLLConvertModel(t *testing.T) {
+	r := newTestRuntime(t)
+	defer r.Close()
+
+	img, err := r.NewMat(50, 50, CV8UC3)
+	if err != nil { t.Fatalf("NewMat: %v", err) }
+	defer img.Close()
+
+	// BGR -> Gray
+	gray, err := r.ConvertModel(img, Gray)
+	if err != nil { t.Fatalf("ConvertModel BGR->Gray: %v", err) }
+	defer gray.Close()
+
+	ch, _ := gray.Channels()
+	if ch != 1 { t.Errorf("Gray channels = %d, want 1", ch) }
+	m, _ := gray.ColorModel()
+	if m != Gray { t.Errorf("Gray model = %v, want Gray", m) }
+
+	// Gray -> BGR
+	bgr, err := r.ConvertModel(gray, BGR)
+	if err != nil { t.Fatalf("ConvertModel Gray->BGR: %v", err) }
+	defer bgr.Close()
+
+	ch2, _ := bgr.Channels()
+	if ch2 != 3 { t.Errorf("BGR channels = %d, want 3", ch2) }
+	m2, _ := bgr.ColorModel()
+	if m2 != BGR { t.Errorf("BGR model = %v, want BGR", m2) }
+
+	// Same model -> clone
+	clone, err := r.ConvertModel(bgr, BGR)
+	if err != nil { t.Fatalf("ConvertModel same: %v", err) }
+	defer clone.Close()
+}
+
+// ---------------------------------------------------------------------------
+// Batch 7: Photo APIs
+// ---------------------------------------------------------------------------
+
+func TestDLLFastNlMeansDenoising(t *testing.T) {
+	r := newTestRuntime(t)
+	defer r.Close()
+
+	src, err := r.NewMat(50, 50, CV8UC1)
+	if err != nil { t.Fatalf("NewMat: %v", err) }
+	defer src.Close()
+
+	dst, err := r.FastNlMeansDenoising(src, 10, 7, 21)
+	if err != nil { t.Fatalf("FastNlMeansDenoising: %v", err) }
+	defer dst.Close()
+
+	rows, _ := dst.Rows()
+	cols, _ := dst.Cols()
+	if rows != 50 || cols != 50 {
+		t.Errorf("dims = %dx%d, want 50x50", rows, cols)
+	}
+}
+
+func TestDLLFastNlMeansDenoisingColored(t *testing.T) {
+	r := newTestRuntime(t)
+	defer r.Close()
+
+	src, err := r.NewMat(50, 50, CV8UC3)
+	if err != nil { t.Fatalf("NewMat: %v", err) }
+	defer src.Close()
+
+	dst, err := r.FastNlMeansDenoisingColored(src, 10, 10, 7, 21)
+	if err != nil { t.Fatalf("FastNlMeansDenoisingColored: %v", err) }
+	defer dst.Close()
+
+	rows, _ := dst.Rows()
+	cols, _ := dst.Cols()
+	if rows != 50 || cols != 50 {
+		t.Errorf("dims = %dx%d, want 50x50", rows, cols)
+	}
+	m, _ := dst.ColorModel()
+	if m != BGR { t.Errorf("model = %v, want BGR", m) }
+}
+
+func TestDLLDetailEnhance(t *testing.T) {
+	r := newTestRuntime(t)
+	defer r.Close()
+
+	src, err := r.NewMat(50, 50, CV8UC3)
+	if err != nil { t.Fatalf("NewMat: %v", err) }
+	defer src.Close()
+
+	dst, err := r.DetailEnhance(src, 10, 0.15)
+	if err != nil { t.Fatalf("DetailEnhance: %v", err) }
+	defer dst.Close()
+
+	rows, _ := dst.Rows()
+	cols, _ := dst.Cols()
+	if rows != 50 || cols != 50 {
+		t.Errorf("dims = %dx%d, want 50x50", rows, cols)
+	}
+}
+
+func TestDLLEdgePreservingFilter(t *testing.T) {
+	r := newTestRuntime(t)
+	defer r.Close()
+
+	src, err := r.NewMat(50, 50, CV8UC3)
+	if err != nil { t.Fatalf("NewMat: %v", err) }
+	defer src.Close()
+
+	dst, err := r.EdgePreservingFilter(src, RecursFilter, 60, 0.4)
+	if err != nil { t.Fatalf("EdgePreservingFilter: %v", err) }
+	defer dst.Close()
+
+	rows, _ := dst.Rows()
+	cols, _ := dst.Cols()
+	if rows != 50 || cols != 50 {
+		t.Errorf("dims = %dx%d, want 50x50", rows, cols)
+	}
+}
+
+func TestDLLStylization(t *testing.T) {
+	r := newTestRuntime(t)
+	defer r.Close()
+
+	src, err := r.NewMat(50, 50, CV8UC3)
+	if err != nil { t.Fatalf("NewMat: %v", err) }
+	defer src.Close()
+
+	dst, err := r.Stylization(src, 60, 0.45)
+	if err != nil { t.Fatalf("Stylization: %v", err) }
+	defer dst.Close()
+
+	rows, _ := dst.Rows()
+	cols, _ := dst.Cols()
+	if rows != 50 || cols != 50 {
+		t.Errorf("dims = %dx%d, want 50x50", rows, cols)
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Batch 8: Features2d APIs
+// ---------------------------------------------------------------------------
+
+func TestDLLFAST(t *testing.T) {
+	r := newTestRuntime(t)
+	defer r.Close()
+
+	src, err := r.Zeros(200, 200, CV8UC1)
+	if err != nil { t.Fatalf("Zeros: %v", err) }
+	defer src.Close()
+
+	// Draw features for detection
+	r.Rectangle(src, Rect{X: 50, Y: 50, Width: 100, Height: 100}, color.Gray{Y: 255}, 2)
+
+	kps, err := r.FAST(src, 50, true)
+	if err != nil { t.Fatalf("FAST: %v", err) }
+
+	if len(kps) == 0 {
+		t.Log("FAST: no keypoints found (possible with simple image)")
+	} else {
+		t.Logf("FAST: found %d keypoints", len(kps))
+		for i, kp := range kps {
+			if i >= 3 { break }
+			t.Logf("  kp[%d]: x=%.1f y=%.1f size=%.1f", i, kp.X, kp.Y, kp.Size)
+		}
+	}
+}
+
+func TestDLLORBDetectCompute(t *testing.T) {
+	r := newTestRuntime(t)
+	defer r.Close()
+
+	src, err := r.Zeros(200, 200, CV8UC1)
+	if err != nil { t.Fatalf("Zeros: %v", err) }
+	defer src.Close()
+
+	r.Rectangle(src, Rect{X: 50, Y: 50, Width: 100, Height: 100}, color.Gray{Y: 255}, 2)
+	r.Circle(src, Point{X: 100, Y: 100}, 30, color.Gray{Y: 200}, -1)
+
+	kps, desc, err := r.ORBDetectCompute(src, 500, 1.2, 8)
+	if err != nil { t.Fatalf("ORBDetectCompute: %v", err) }
+	defer desc.Close()
+
+	dr, _ := desc.Rows()
+	dc, _ := desc.Cols()
+	t.Logf("ORB: %d keypoints, descriptor %dx%d", len(kps), dr, dc)
+	if len(kps) > 0 {
+		kp := kps[0]
+		t.Logf("  first kp: x=%.1f y=%.1f size=%.1f angle=%.1f", kp.X, kp.Y, kp.Size, kp.Angle)
+	}
+}
+
+func TestDLLBFMatch(t *testing.T) {
+	r := newTestRuntime(t)
+	defer r.Close()
+
+	src, err := r.Zeros(200, 200, CV8UC1)
+	if err != nil { t.Fatalf("Zeros: %v", err) }
+	defer src.Close()
+
+	r.Rectangle(src, Rect{X: 50, Y: 50, Width: 100, Height: 100}, color.Gray{Y: 255}, 2)
+	r.Circle(src, Point{X: 100, Y: 100}, 30, color.Gray{Y: 200}, -1)
+
+	kps1, desc1, err := r.ORBDetectCompute(src, 500, 1.2, 8)
+	if err != nil { t.Fatalf("ORB1: %v", err) }
+	defer desc1.Close()
+
+	if len(kps1) < 2 {
+		t.Skip("Not enough keypoints for BFMatch test")
+	}
+
+	kps2, desc2, err := r.ORBDetectCompute(src, 500, 1.2, 8)
+	if err != nil { t.Fatalf("ORB2: %v", err) }
+	defer desc2.Close()
+
+	matches, err := r.BFMatch(desc1, desc2, NormHamming)
+	if err != nil { t.Fatalf("BFMatch: %v", err) }
+
+	t.Logf("BFMatch: %d matches out of %d and %d keypoints", len(matches), len(kps1), len(kps2))
+	if len(matches) > 0 {
+		m := matches[0]
+		t.Logf("  first match: query=%d train=%d dist=%.1f", m.QueryIdx, m.TrainIdx, m.Distance)
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Batch 9: Core extras (Diag, AtByte, SetByte)
+// ---------------------------------------------------------------------------
+
+func TestDLLMatDiag(t *testing.T) {
+	r := newTestRuntime(t)
+	defer r.Close()
+
+	eye, err := r.Eye(3, 3, CV8UC1)
+	if err != nil { t.Fatalf("Eye: %v", err) }
+	defer eye.Close()
+
+	diag, err := eye.Diag()
+	if err != nil { t.Fatalf("Diag: %v", err) }
+	defer diag.Close()
+
+	rows, _ := diag.Rows()
+	cols, _ := diag.Cols()
+	if rows != 3 || cols != 1 {
+		t.Errorf("Diag dims = %dx%d, want 3x1", rows, cols)
+	}
+}
+
+func TestDLLMatAtSetByte(t *testing.T) {
+	r := newTestRuntime(t)
+	defer r.Close()
+
+	mat, err := r.NewMat(10, 10, CV8UC3)
+	if err != nil { t.Fatalf("NewMat: %v", err) }
+	defer mat.Close()
+
+	// Set a pixel
+	err = mat.SetByte(5, 5, 0, 42)
+	if err != nil { t.Fatalf("SetByte: %v", err) }
+
+	// Get it back
+	val, err := mat.AtByte(5, 5, 0)
+	if err != nil { t.Fatalf("AtByte: %v", err) }
+
+	if val != 42 {
+		t.Errorf("AtByte = %d, want 42", val)
+	}
+}

@@ -35,7 +35,9 @@ cl /LD /nologo /O2 /utf-8 /W3 /EHsc /MD /utf-8 ^
     "!LIB_DIR!\opencv_photo4130.lib" ^
     "!LIB_DIR!\opencv_features2d4130.lib" ^
     "!LIB_DIR!\opencv_highgui4130.lib" ^
-    ole32.lib
+    ole32.lib ^
+    user32.lib ^
+    gdi32.lib
 
 if %ERRORLEVEL% NEQ 0 (
     echo.

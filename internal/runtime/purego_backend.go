@@ -137,6 +137,61 @@ type PuregoBackend struct {
 	vecMatLen    func(handle uint64) int32
 	vecMatGet    func(handle uint64, idx int32) uint64
 	vecMatDelete func(handle uint64)
+
+	// New imgproc
+	bilateralFilter     func(src, dst uint64, d int32, sigmaColor, sigmaSpace float64) int32
+	inRange             func(src uint64, lb0, lb1, lb2, lb3, ub0, ub1, ub2, ub3 float64, dst uint64) int32
+	matchTemplate       func(img, tmpl, result uint64, method int32) int32
+	calcHist            func(src, dst uint64, bins int32, rangeMin, rangeMax float64) int32
+	connectedComponents func(src, dst uint64, connectivity, ltype int32) int32
+	distanceTransform   func(src, dst uint64, distType, maskSize int32) int32
+	copyMakeBorder      func(src, dst uint64, top, bottom, left, right int32, borderType int32, v0, v1, v2, v3 float64) int32
+	rotate              func(src, dst uint64, rotateCode int32) int32
+	hconcat             func(src1, src2, dst uint64) int32
+	vconcat             func(src1, src2, dst uint64) int32
+	remap               func(src, dst, map1, map2 uint64, interpolation, borderMode int32, borderVal float64) int32
+	lut                 func(src, lut, dst uint64) int32
+	integral            func(src, sum uint64) int32
+	getPerspectiveTx    func(srcPts, dstPts unsafe.Pointer) uint64
+	fillConvexPoly      func(img, pts uint64, npts int32, r, g, b, a float64, lineType, shift int32) int32
+	convertModel        func(src, dst uint64, srcModel, dstModel int32) int32
+
+	// Photo
+	fastNlMeansDenoising        func(src, dst uint64, h float32, templateWindow, searchWindow int32) int32
+	fastNlMeansDenoisingColored func(src, dst uint64, h, hColor float32, templateWindow, searchWindow int32) int32
+	detailEnhance                func(src, dst uint64, sigmaS, sigmaR float32) int32
+	edgePreservingFilter         func(src, dst uint64, flags int32, sigmaS, sigmaR float32) int32
+	pencilSketch                 func(src, dst1, dst2 uint64, sigmaS, sigmaR, shadeFactor float32) int32
+	stylization                  func(src, dst uint64, sigmaS, sigmaR float32) int32
+	seamlessClone                func(src, dst, mask, out uint64, cx, cy int32, flags int32) int32
+
+	// Features2d
+	fast              func(src, kpVec uint64, threshold, nonmaxSuppression int32) int32
+	orbDetectCompute  func(src, mask, kpVec, descriptors uint64, nfeatures int32, scaleFactor float32, nlevels int32) int32
+	bfMatch           func(desc1, desc2, matchVec uint64, normType int32) int32
+	drawKeypoints     func(img, kpVec, out uint64, r, g, b float64) int32
+
+	// Highgui
+	imshow         func(winname unsafe.Pointer, winnameLen int32, mat uint64) int32
+	waitKey        func(delay int32) int32
+	destroyWindow  func(winname unsafe.Pointer, winnameLen int32) int32
+
+	// Core extras
+	matDiag  func(handle uint64) uint64
+	matAtU8  func(handle uint64, row, col, ch int32, outVal *uint8) int32
+	matSetU8 func(handle uint64, row, col, ch int32, val uint8) int32
+
+	// Vector helpers — keypoints
+	vecKeypointNew    func() uint64
+	vecKeypointLen    func(handle uint64) int32
+	vecKeypointGet    func(handle uint64, idx int32, outX, outY, outSize, outAngle, outResponse *float32, outOctave, outClassID *int32) int32
+	vecKeypointDelete func(handle uint64)
+
+	// Vector helpers — dmatch
+	vecDMatchNew    func() uint64
+	vecDMatchLen    func(handle uint64) int32
+	vecDMatchGet    func(handle uint64, idx int32, outQIdx, outTIdx *int32, outDist *float32, outImgIdx *int32) int32
+	vecDMatchDelete func(handle uint64)
 }
 
 // NewPuregoBackend loads the native shared library and resolves all ABI exports.
@@ -297,6 +352,61 @@ func NewPuregoBackend(libPath string) (*PuregoBackend, error) {
 		{abi.VecLenMat, &b.vecMatLen},
 		{abi.VecGetMat, &b.vecMatGet},
 		{abi.VecDeleteMat, &b.vecMatDelete},
+
+		// New imgproc
+		{abi.BilateralFilter, &b.bilateralFilter},
+		{abi.InRange, &b.inRange},
+		{abi.MatchTemplate, &b.matchTemplate},
+		{abi.CalcHistABI, &b.calcHist},
+		{abi.ConnectedComponents, &b.connectedComponents},
+		{abi.DistanceTransform, &b.distanceTransform},
+		{abi.CopyMakeBorder, &b.copyMakeBorder},
+		{abi.Rotate, &b.rotate},
+		{abi.Hconcat, &b.hconcat},
+		{abi.Vconcat, &b.vconcat},
+		{abi.Remap, &b.remap},
+		{abi.LUT, &b.lut},
+		{abi.Integral, &b.integral},
+		{abi.GetPerspectiveTransform, &b.getPerspectiveTx},
+		{abi.FillConvexPoly, &b.fillConvexPoly},
+		{abi.ConvertModel, &b.convertModel},
+
+		// Photo
+		{abi.FastNlMeansDenoising, &b.fastNlMeansDenoising},
+		{abi.FastNlMeansDenoisingColored, &b.fastNlMeansDenoisingColored},
+		{abi.DetailEnhance, &b.detailEnhance},
+		{abi.EdgePreservingFilter, &b.edgePreservingFilter},
+		{abi.PencilSketch, &b.pencilSketch},
+		{abi.Stylization, &b.stylization},
+		{abi.SeamlessClone, &b.seamlessClone},
+
+		// Features2d
+		{abi.FAST, &b.fast},
+		{abi.ORBDetectCompute, &b.orbDetectCompute},
+		{abi.BFMatch, &b.bfMatch},
+		{abi.DrawKeypoints, &b.drawKeypoints},
+
+		// Highgui
+		{abi.ImShow, &b.imshow},
+		{abi.WaitKey, &b.waitKey},
+		{abi.DestroyWindow, &b.destroyWindow},
+
+		// Core extras
+		{abi.MatDiag, &b.matDiag},
+		{abi.MatAtU8, &b.matAtU8},
+		{abi.MatSetU8, &b.matSetU8},
+
+		// Vector helpers — keypoints
+		{abi.VecNewKeypoint, &b.vecKeypointNew},
+		{abi.VecLenKeypoint, &b.vecKeypointLen},
+		{abi.VecGetKeypoint, &b.vecKeypointGet},
+		{abi.VecDeleteKeypoint, &b.vecKeypointDelete},
+
+		// Vector helpers — dmatch
+		{abi.VecNewDMatch, &b.vecDMatchNew},
+		{abi.VecLenDMatch, &b.vecDMatchLen},
+		{abi.VecGetDMatch, &b.vecDMatchGet},
+		{abi.VecDeleteDMatch, &b.vecDMatchDelete},
 	}
 	for _, o := range opts {
 		func() {
@@ -1116,6 +1226,253 @@ func (b *PuregoBackend) VecMatDelete(_ context.Context, handle uint64) {
 	if b.vecMatDelete != nil {
 		b.vecMatDelete(handle)
 	}
+}
+
+// ---------------------------------------------------------------------------
+// New imgproc
+// ---------------------------------------------------------------------------
+
+func (b *PuregoBackend) BilateralFilter(_ context.Context, src, dst uint64, d int32, sigmaColor, sigmaSpace float64) error {
+	if b.bilateralFilter == nil { return errNotSupported("bilateral_filter") }
+	return errorCode(abi.BilateralFilter, abi.ErrorCode(b.bilateralFilter(src, dst, d, sigmaColor, sigmaSpace)))
+}
+
+func (b *PuregoBackend) InRange(_ context.Context, src uint64, lb0, lb1, lb2, lb3, ub0, ub1, ub2, ub3 float64, dst uint64) error {
+	if b.inRange == nil { return errNotSupported("in_range") }
+	return errorCode(abi.InRange, abi.ErrorCode(b.inRange(src, lb0, lb1, lb2, lb3, ub0, ub1, ub2, ub3, dst)))
+}
+
+func (b *PuregoBackend) MatchTemplate(_ context.Context, img, tmpl, result uint64, method int32) error {
+	if b.matchTemplate == nil { return errNotSupported("match_template") }
+	return errorCode(abi.MatchTemplate, abi.ErrorCode(b.matchTemplate(img, tmpl, result, method)))
+}
+
+func (b *PuregoBackend) CalcHist(_ context.Context, src, dst uint64, bins int32, rangeMin, rangeMax float64) error {
+	if b.calcHist == nil { return errNotSupported("calc_hist") }
+	return errorCode(abi.CalcHistABI, abi.ErrorCode(b.calcHist(src, dst, bins, rangeMin, rangeMax)))
+}
+
+func (b *PuregoBackend) ConnectedComponents(_ context.Context, src, dst uint64, connectivity, ltype int32) error {
+	if b.connectedComponents == nil { return errNotSupported("connected_components") }
+	return errorCode(abi.ConnectedComponents, abi.ErrorCode(b.connectedComponents(src, dst, connectivity, ltype)))
+}
+
+func (b *PuregoBackend) DistanceTransform(_ context.Context, src, dst uint64, distType, maskSize int32) error {
+	if b.distanceTransform == nil { return errNotSupported("distance_transform") }
+	return errorCode(abi.DistanceTransform, abi.ErrorCode(b.distanceTransform(src, dst, distType, maskSize)))
+}
+
+func (b *PuregoBackend) CopyMakeBorder(_ context.Context, src, dst uint64, top, bottom, left, right int32, borderType int32, v0, v1, v2, v3 float64) error {
+	if b.copyMakeBorder == nil { return errNotSupported("copy_make_border") }
+	return errorCode(abi.CopyMakeBorder, abi.ErrorCode(b.copyMakeBorder(src, dst, top, bottom, left, right, borderType, v0, v1, v2, v3)))
+}
+
+func (b *PuregoBackend) Rotate(_ context.Context, src, dst uint64, rotateCode int32) error {
+	if b.rotate == nil { return errNotSupported("rotate") }
+	return errorCode(abi.Rotate, abi.ErrorCode(b.rotate(src, dst, rotateCode)))
+}
+
+func (b *PuregoBackend) Hconcat(_ context.Context, src1, src2, dst uint64) error {
+	if b.hconcat == nil { return errNotSupported("hconcat") }
+	return errorCode(abi.Hconcat, abi.ErrorCode(b.hconcat(src1, src2, dst)))
+}
+
+func (b *PuregoBackend) Vconcat(_ context.Context, src1, src2, dst uint64) error {
+	if b.vconcat == nil { return errNotSupported("vconcat") }
+	return errorCode(abi.Vconcat, abi.ErrorCode(b.vconcat(src1, src2, dst)))
+}
+
+func (b *PuregoBackend) Remap(_ context.Context, src, dst, map1, map2 uint64, interpolation, borderMode int32, borderVal float64) error {
+	if b.remap == nil { return errNotSupported("remap") }
+	return errorCode(abi.Remap, abi.ErrorCode(b.remap(src, dst, map1, map2, interpolation, borderMode, borderVal)))
+}
+
+func (b *PuregoBackend) LUT(_ context.Context, src, lut, dst uint64) error {
+	if b.lut == nil { return errNotSupported("lut") }
+	return errorCode(abi.LUT, abi.ErrorCode(b.lut(src, lut, dst)))
+}
+
+func (b *PuregoBackend) Integral(_ context.Context, src, sum uint64) error {
+	if b.integral == nil { return errNotSupported("integral") }
+	return errorCode(abi.Integral, abi.ErrorCode(b.integral(src, sum)))
+}
+
+func (b *PuregoBackend) GetPerspectiveTransform(_ context.Context, s0x, s0y, s1x, s1y, s2x, s2y, s3x, s3y, d0x, d0y, d1x, d1y, d2x, d2y, d3x, d3y float64) (uint64, error) {
+	if b.getPerspectiveTx == nil { return 0, errNotSupported("get_perspective_transform") }
+	srcPts := [8]float32{float32(s0x), float32(s0y), float32(s1x), float32(s1y), float32(s2x), float32(s2y), float32(s3x), float32(s3y)}
+	dstPts := [8]float32{float32(d0x), float32(d0y), float32(d1x), float32(d1y), float32(d2x), float32(d2y), float32(d3x), float32(d3y)}
+	h := b.getPerspectiveTx(unsafe.Pointer(&srcPts[0]), unsafe.Pointer(&dstPts[0]))
+	if h == 0 { return 0, fmt.Errorf("purego: get_perspective_transform failed") }
+	return h, nil
+}
+
+func (b *PuregoBackend) FillConvexPoly(_ context.Context, img, pts uint64, npts int32, r, g, bl, a float64, lineType, shift int32) error {
+	if b.fillConvexPoly == nil { return errNotSupported("fill_convex_poly") }
+	return errorCode(abi.FillConvexPoly, abi.ErrorCode(b.fillConvexPoly(img, pts, npts, r, g, bl, a, lineType, shift)))
+}
+
+func (b *PuregoBackend) ConvertModel(_ context.Context, src, dst uint64, srcModel, dstModel int32) error {
+	if b.convertModel == nil { return errNotSupported("convert_model") }
+	return errorCode(abi.ConvertModel, abi.ErrorCode(b.convertModel(src, dst, srcModel, dstModel)))
+}
+
+// ---------------------------------------------------------------------------
+// Photo
+// ---------------------------------------------------------------------------
+
+func (b *PuregoBackend) FastNlMeansDenoising(_ context.Context, src, dst uint64, h float32, templateWindow, searchWindow int32) error {
+	if b.fastNlMeansDenoising == nil { return errNotSupported("fast_nl_means_denoising") }
+	return errorCode(abi.FastNlMeansDenoising, abi.ErrorCode(b.fastNlMeansDenoising(src, dst, h, templateWindow, searchWindow)))
+}
+
+func (b *PuregoBackend) FastNlMeansDenoisingColored(_ context.Context, src, dst uint64, h, hColor float32, templateWindow, searchWindow int32) error {
+	if b.fastNlMeansDenoisingColored == nil { return errNotSupported("fast_nl_means_denoising_colored") }
+	return errorCode(abi.FastNlMeansDenoisingColored, abi.ErrorCode(b.fastNlMeansDenoisingColored(src, dst, h, hColor, templateWindow, searchWindow)))
+}
+
+func (b *PuregoBackend) DetailEnhance(_ context.Context, src, dst uint64, sigmaS, sigmaR float32) error {
+	if b.detailEnhance == nil { return errNotSupported("detail_enhance") }
+	return errorCode(abi.DetailEnhance, abi.ErrorCode(b.detailEnhance(src, dst, sigmaS, sigmaR)))
+}
+
+func (b *PuregoBackend) EdgePreservingFilter(_ context.Context, src, dst uint64, flags int32, sigmaS, sigmaR float32) error {
+	if b.edgePreservingFilter == nil { return errNotSupported("edge_preserving_filter") }
+	return errorCode(abi.EdgePreservingFilter, abi.ErrorCode(b.edgePreservingFilter(src, dst, flags, sigmaS, sigmaR)))
+}
+
+func (b *PuregoBackend) PencilSketch(_ context.Context, src, dst1, dst2 uint64, sigmaS, sigmaR, shadeFactor float32) error {
+	if b.pencilSketch == nil { return errNotSupported("pencil_sketch") }
+	return errorCode(abi.PencilSketch, abi.ErrorCode(b.pencilSketch(src, dst1, dst2, sigmaS, sigmaR, shadeFactor)))
+}
+
+func (b *PuregoBackend) Stylization(_ context.Context, src, dst uint64, sigmaS, sigmaR float32) error {
+	if b.stylization == nil { return errNotSupported("stylization") }
+	return errorCode(abi.Stylization, abi.ErrorCode(b.stylization(src, dst, sigmaS, sigmaR)))
+}
+
+func (b *PuregoBackend) SeamlessClone(_ context.Context, src, dst, mask, out uint64, cx, cy int32, flags int32) error {
+	if b.seamlessClone == nil { return errNotSupported("seamless_clone") }
+	return errorCode(abi.SeamlessClone, abi.ErrorCode(b.seamlessClone(src, dst, mask, out, cx, cy, flags)))
+}
+
+// ---------------------------------------------------------------------------
+// Features2d
+// ---------------------------------------------------------------------------
+
+func (b *PuregoBackend) FAST(_ context.Context, src, kpVec uint64, threshold, nonmaxSuppression int32) error {
+	if b.fast == nil { return errNotSupported("fast") }
+	return errorCode(abi.FAST, abi.ErrorCode(b.fast(src, kpVec, threshold, nonmaxSuppression)))
+}
+
+func (b *PuregoBackend) ORBDetectCompute(_ context.Context, src, mask, kpVec, descriptors uint64, nfeatures int32, scaleFactor float32, nlevels int32) error {
+	if b.orbDetectCompute == nil { return errNotSupported("orb_detect_compute") }
+	return errorCode(abi.ORBDetectCompute, abi.ErrorCode(b.orbDetectCompute(src, mask, kpVec, descriptors, nfeatures, scaleFactor, nlevels)))
+}
+
+func (b *PuregoBackend) BFMatch(_ context.Context, desc1, desc2, matchVec uint64, normType int32) error {
+	if b.bfMatch == nil { return errNotSupported("bf_match") }
+	return errorCode(abi.BFMatch, abi.ErrorCode(b.bfMatch(desc1, desc2, matchVec, normType)))
+}
+
+func (b *PuregoBackend) DrawKeypoints(_ context.Context, img, kpVec, out uint64, r, g, bl float64) error {
+	if b.drawKeypoints == nil { return errNotSupported("draw_keypoints") }
+	return errorCode(abi.DrawKeypoints, abi.ErrorCode(b.drawKeypoints(img, kpVec, out, r, g, bl)))
+}
+
+// ---------------------------------------------------------------------------
+// Highgui
+// ---------------------------------------------------------------------------
+
+func (b *PuregoBackend) ImShow(_ context.Context, winname unsafe.Pointer, winnameLen int32, mat uint64) error {
+	if b.imshow == nil { return errNotSupported("imshow") }
+	return errorCode(abi.ImShow, abi.ErrorCode(b.imshow(winname, winnameLen, mat)))
+}
+
+func (b *PuregoBackend) WaitKey(_ context.Context, delay int32) (int32, error) {
+	if b.waitKey == nil { return -1, errNotSupported("wait_key") }
+	r := b.waitKey(delay)
+	if r < 0 { return r, fmt.Errorf("wait_key: no key pressed or error") }
+	return r, nil
+}
+
+func (b *PuregoBackend) DestroyWindow(_ context.Context, winname unsafe.Pointer, winnameLen int32) error {
+	if b.destroyWindow == nil { return errNotSupported("destroy_window") }
+	return errorCode(abi.DestroyWindow, abi.ErrorCode(b.destroyWindow(winname, winnameLen)))
+}
+
+// ---------------------------------------------------------------------------
+// Core extras
+// ---------------------------------------------------------------------------
+
+func (b *PuregoBackend) MatDiag(_ context.Context, handle uint64) (uint64, error) {
+	if b.matDiag == nil { return 0, errNotSupported("mat_diag") }
+	h := b.matDiag(handle)
+	if h == 0 { return 0, fmt.Errorf("purego: mat_diag failed") }
+	return h, nil
+}
+
+func (b *PuregoBackend) MatAtU8(_ context.Context, handle uint64, row, col, ch int32) (uint8, error) {
+	if b.matAtU8 == nil { return 0, errNotSupported("mat_at_u8") }
+	var val uint8
+	err := errorCode(abi.MatAtU8, abi.ErrorCode(b.matAtU8(handle, row, col, ch, &val)))
+	return val, err
+}
+
+func (b *PuregoBackend) MatSetU8(_ context.Context, handle uint64, row, col, ch int32, val uint8) error {
+	if b.matSetU8 == nil { return errNotSupported("mat_set_u8") }
+	return errorCode(abi.MatSetU8, abi.ErrorCode(b.matSetU8(handle, row, col, ch, val)))
+}
+
+// ---------------------------------------------------------------------------
+// Vector helpers — keypoints
+// ---------------------------------------------------------------------------
+
+func (b *PuregoBackend) VecKeypointNew(_ context.Context) (uint64, error) {
+	if b.vecKeypointNew == nil { return 0, errNotSupported("vec_keypoint_new") }
+	return b.vecKeypointNew(), nil
+}
+
+func (b *PuregoBackend) VecKeypointLen(_ context.Context, handle uint64) (int, error) {
+	if b.vecKeypointLen == nil { return 0, errNotSupported("vec_keypoint_len") }
+	return int(b.vecKeypointLen(handle)), nil
+}
+
+func (b *PuregoBackend) VecKeypointGet(_ context.Context, handle uint64, idx int32) (float32, float32, float32, float32, float32, int32, int32, error) {
+	if b.vecKeypointGet == nil { return 0, 0, 0, 0, 0, 0, 0, errNotSupported("vec_keypoint_get") }
+	var x, y, size, angle, response float32
+	var octave, classID int32
+	err := errorCode(abi.VecGetKeypoint, abi.ErrorCode(b.vecKeypointGet(handle, idx, &x, &y, &size, &angle, &response, &octave, &classID)))
+	return x, y, size, angle, response, octave, classID, err
+}
+
+func (b *PuregoBackend) VecKeypointDelete(_ context.Context, handle uint64) {
+	if b.vecKeypointDelete != nil { b.vecKeypointDelete(handle) }
+}
+
+// ---------------------------------------------------------------------------
+// Vector helpers — dmatch
+// ---------------------------------------------------------------------------
+
+func (b *PuregoBackend) VecDMatchNew(_ context.Context) (uint64, error) {
+	if b.vecDMatchNew == nil { return 0, errNotSupported("vec_dmatch_new") }
+	return b.vecDMatchNew(), nil
+}
+
+func (b *PuregoBackend) VecDMatchLen(_ context.Context, handle uint64) (int, error) {
+	if b.vecDMatchLen == nil { return 0, errNotSupported("vec_dmatch_len") }
+	return int(b.vecDMatchLen(handle)), nil
+}
+
+func (b *PuregoBackend) VecDMatchGet(_ context.Context, handle uint64, idx int32) (int32, int32, float32, int32, error) {
+	if b.vecDMatchGet == nil { return 0, 0, 0, 0, errNotSupported("vec_dmatch_get") }
+	var qidx, tidx, imgidx int32
+	var dist float32
+	err := errorCode(abi.VecGetDMatch, abi.ErrorCode(b.vecDMatchGet(handle, idx, &qidx, &tidx, &dist, &imgidx)))
+	return qidx, tidx, dist, imgidx, err
+}
+
+func (b *PuregoBackend) VecDMatchDelete(_ context.Context, handle uint64) {
+	if b.vecDMatchDelete != nil { b.vecDMatchDelete(handle) }
 }
 
 // ---------------------------------------------------------------------------

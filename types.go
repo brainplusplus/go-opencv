@@ -31,6 +31,16 @@ const (
 	CV8UC2 MatType = CV8U + 8
 	CV8UC3 MatType = CV8U + 16
 	CV8UC4 MatType = CV8U + 24
+
+	CV32FC1 MatType = CV32F + 0
+	CV32FC2 MatType = CV32F + 8
+	CV32FC3 MatType = CV32F + 16
+	CV32FC4 MatType = CV32F + 24
+
+	CV32SC1 MatType = CV32S + 0
+	CV32SC2 MatType = CV32S + 8
+	CV32SC3 MatType = CV32S + 16
+	CV32SC4 MatType = CV32S + 24
 )
 
 // ColorConversionCode mirrors OpenCV.js color conversion constants.
@@ -292,3 +302,58 @@ type DMatch struct {
 	ImgIdx   int32
 	Distance float32
 }
+
+type RotateCode int32
+
+const (
+	Rotate90Clockwise        RotateCode = 0
+	Rotate180                RotateCode = 1
+	Rotate90CounterClockwise RotateCode = 2
+)
+
+type TemplateMatchMethod int32
+
+const (
+	TMSqDiff       TemplateMatchMethod = 0
+	TMSqDiffNormed TemplateMatchMethod = 1
+	TMCCorr        TemplateMatchMethod = 2
+	TMCCorrNormed  TemplateMatchMethod = 3
+	TMCCoeff       TemplateMatchMethod = 4
+	TMCCoeffNormed TemplateMatchMethod = 5
+)
+
+type DistanceType int32
+
+const (
+	DistUser    DistanceType = 0
+	DistL1      DistanceType = 1
+	DistL2      DistanceType = 2
+	DistC       DistanceType = 3
+	DistL12     DistanceType = 4
+	DistFair    DistanceType = 5
+	DistWelsch  DistanceType = 6
+	DistHuber   DistanceType = 7
+	DistMask    DistanceType = 8
+)
+
+type EdgePreservingFilterFlag int32
+
+const (
+	RecursFilter EdgePreservingFilterFlag = 1
+	NormconvFilter EdgePreservingFilterFlag = 2
+)
+
+type SeamlessCloneMethod int32
+
+const (
+	NormalClone    SeamlessCloneMethod = 1
+	MixedClone     SeamlessCloneMethod = 2
+	FeatureExchange SeamlessCloneMethod = 3
+)
+
+type ORBScoreType int32
+
+const (
+	ORBHarrisScore ORBScoreType = 0
+	ORBFASTScore   ORBScoreType = 1
+)
