@@ -41,10 +41,6 @@ jobs:
             runner: macos-14
             artifact: goopencv-macos-arm64
             output: dist/goopencv.dylib
-          - name: macos-x86_64
-            runner: macos-13
-            artifact: goopencv-macos-x86_64
-            output: dist/goopencv.dylib
 
     steps:
       - uses: actions/checkout@v4
@@ -89,16 +85,16 @@ jobs:
         if: matrix.platform.name == 'linux-arm64'
         run: bash build-tools/build-goopencv-linux-arm64.sh
 
-      # ── macOS (arm64 on macos-14, x86_64 on macos-13) ───────
+      # ── macOS arm64 ──────────────────────────────────────────
       - name: Download opencv-mobile (macOS)
-        if: startsWith(matrix.platform.name, 'macos-')
+        if: matrix.platform.name == 'macos-arm64'
         run: |
           wget -q https://github.com/nihui/opencv-mobile/releases/latest/download/opencv-mobile-${{ env.OPENCV_VERSION }}-macos.zip -O /tmp/opencv-mobile.zip
           unzip -q -o /tmp/opencv-mobile.zip -d build-tools/
           rm /tmp/opencv-mobile.zip
 
       - name: Build goopencv.dylib (macOS)
-        if: startsWith(matrix.platform.name, 'macos-')
+        if: matrix.platform.name == 'macos-arm64'
         run: bash build-tools/build-goopencv-macos.sh
 
       # ── Upload artifact ──────────────────────────────────────
@@ -109,53 +105,11 @@ jobs:
           path: ${{ matrix.platform.output }}
           compression-level: 0
 
-  # ── macOS lipo merge: arm64 + x86_64 → universal ────────────
-  macos-lipo:
-    name: macOS Universal (lipo merge)
-    runs-on: macos-14
-    needs: build
-    steps:
-      - name: Download arm64 dylib
-        uses: actions/download-artifact@v4
-        with:
-          name: goopencv-macos-arm64
-          path: ./arm64/
-
-      - name: Download x86_64 dylib
-        uses: actions/download-artifact@v4
-        with:
-          name: goopencv-macos-x86_64
-          path: ./x86_64/
-
-      - name: Verify architectures
-        run: |
-          echo "=== arm64 dylib ==="
-          lipo -info arm64/goopencv.dylib
-          file arm64/goopencv.dylib
-          echo "=== x86_64 dylib ==="
-          lipo -info x86_64/goopencv.dylib
-          file x86_64/goopencv.dylib
-
-      - name: Lipo merge → universal
-        run: |
-          mkdir -p dist
-          lipo -create arm64/goopencv.dylib x86_64/goopencv.dylib -output dist/goopencv.dylib
-          echo "=== Universal dylib ==="
-          lipo -info dist/goopencv.dylib
-          ls -lh dist/goopencv.dylib
-
-      - name: Upload universal artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: goopencv-macos-universal
-          path: dist/goopencv.dylib
-          compression-level: 0
-
   # ── Go test on available runners ──────────────────────────
   test:
     name: Go Test (${{ matrix.platform.name }})
     runs-on: ${{ matrix.platform.runner }}
-    needs: [build, macos-lipo]
+    needs: build
     strategy:
       fail-fast: false
       matrix:
@@ -168,7 +122,7 @@ jobs:
             artifact: goopencv-linux-amd64
           - name: macos-arm64
             runner: macos-14
-            artifact: goopencv-macos-universal
+            artifact: goopencv-macos-arm64
 
     steps:
       - uses: actions/checkout@v4
