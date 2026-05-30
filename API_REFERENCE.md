@@ -241,5 +241,5 @@ All 115 functional APIs are fully wired and tested. Only HighGUI windowing (ImSh
 | Windows | amd64 | ✅ |
 | Linux | amd64 | ✅ |
 | Linux | arm64 | ✅ |
+| macOS | amd64 (Intel) | ✅ |
 | macOS | arm64 (Apple Silicon) | ✅ |
-| macOS | amd64 (Intel) | ❌ (opencv-mobile SDK is ARM64 only) |

@@ -1,237 +1,187 @@
 # go-opencv
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/brainplusplus/go-opencv.svg)](https://pkg.go.dev/github.com/brainplusplus/go-opencv)
-[![Go Report Card](https://goreportcard.com/badge/github.com/brainplusplus/go-opencv)](https://goreportcard.com/report/github.com/brainplusplus/go-opencv)
+<p align="center">
+  <img src="assets/goopencv-logo.svg" alt="go-opencv logo" width="720">
+</p>
 
-CGO-free Go OpenCV library. Prebuilt native binary (`goopencv.dll/.so/.dylib`) wrapping real OpenCV via [opencv-mobile](https://github.com/nicehash/opencv-mobile) — loaded at runtime via [purego](https://github.com/ebitengine/purego).
+<p align="center">
+  CGO-free OpenCV for Go with embedded native runtimes, purego loading, and a universal macOS dylib.
+</p>
 
-**No C compiler required at build time.** Users just `go get` and run.
+<p align="center">
+  <a href="https://pkg.go.dev/github.com/brainplusplus/go-opencv"><img src="https://pkg.go.dev/badge/github.com/brainplusplus/go-opencv.svg" alt="Go Reference"></a>
+  <a href="https://goreportcard.com/report/github.com/brainplusplus/go-opencv"><img src="https://goreportcard.com/badge/github.com/brainplusplus/go-opencv" alt="Go Report Card"></a>
+</p>
 
-## Features
+`go-opencv` wraps real OpenCV in a prebuilt native backend and loads it at runtime through [purego](https://github.com/ebitengine/purego). Consumers stay on `CGO_ENABLED=0`, ship a normal Go binary, and still get OpenCV-backed image processing.
 
-- **CGO_ENABLED=0** — zero C toolchain at user build time
-- **OpenCV-style API** — `IMRead`, `CvtColor`, `GaussianBlur`, `FindContours`, `WarpAffine`, etc.
-- **Prebuilt binary auto-load** — embedded `goopencv.dll` extracted to cache on first use
-- **Explicit color model** — `BGR`, `RGB`, `RGBA`, `Gray` tracked per-Mat, no hidden conversions
-- **96 ABI exports** — core + imgproc + morphology + contours + hough + warp + arithmetic
+The project uses [nihui/opencv-mobile](https://github.com/nihui/opencv-mobile) **4.13.0** as the upstream OpenCV distribution and embeds platform-specific native artifacts directly into the Go package.
 
-## Quick Start
+## Why this project
+
+- `CGO_ENABLED=0` for application builds
+- Embedded native runtimes with automatic cache extraction
+- Real OpenCV execution, not a partial pure-Go imitation
+- Cross-platform release assets for Windows, Linux, and macOS
+- Universal macOS dylib with both `x86_64` and `arm64` slices
+- Familiar OpenCV-style API for image I/O, color conversion, filtering, geometry, contours, drawing, and more
+
+## Platform support
+
+| Platform | GOARCH | Artifact | Status |
+|---|---|---|---|
+| Windows | `amd64` | `goopencv.dll` | Supported |
+| Linux | `amd64` | `goopencv.so` | Supported |
+| Linux | `arm64` | `goopencv-linux-arm64.so` | Supported |
+| macOS | `amd64` | `goopencv.dylib` | Supported via universal dylib |
+| macOS | `arm64` | `goopencv.dylib` | Supported via universal dylib |
+
+More detail lives in [SUPPORTED_PLATFORMS.md](SUPPORTED_PLATFORMS.md).
+
+## Quick start
 
 ```go
 package main
 
 import (
-    "context"
-    "fmt"
-    "log"
+	"context"
+	"fmt"
+	"log"
 
-    opencv "github.com/brainplusplus/go-opencv"
+	opencv "github.com/brainplusplus/go-opencv"
 )
 
 func main() {
-    cv, err := opencv.New(context.Background())
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer cv.Close()
+	cv, err := opencv.New(context.Background())
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer cv.Close()
 
-    // Read image (default: BGR)
-    img, err := cv.IMRead("photo.png")
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer img.Close()
+	img, err := cv.IMRead("photo.png")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer img.Close()
 
-    rows, _ := img.Rows()
-    cols, _ := img.Cols()
-    fmt.Printf("Loaded: %dx%d\n", cols, rows)
+	blurred, err := cv.GaussianBlur(img, opencv.Size{Width: 5, Height: 5}, 0)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer blurred.Close()
 
-    // Convert BGR -> Gray
-    gray, err := cv.NewMat(rows, cols, opencv.CV8UC1)
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer gray.Close()
-    cv.CvtColor(img, gray, opencv.ColorBGR2Gray)
+	if err := cv.IMWrite("output.png", blurred); err != nil {
+		log.Fatal(err)
+	}
 
-    // Gaussian blur
-    blurred, err := cv.GaussianBlur(img, opencv.Size{Width: 5, Height: 5}, 0)
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer blurred.Close()
-
-    // Write output
-    cv.IMWrite("output.png", blurred)
+	rows, _ := blurred.Rows()
+	cols, _ := blurred.Cols()
+	fmt.Printf("wrote output.png (%dx%d)\n", cols, rows)
 }
 ```
 
-## API Surface
+## What you get
 
 ### Image I/O
-| Method | Description |
-|--------|-------------|
-| `IMRead(path, ...ColorModel)` | Read image file (PNG, JPEG, GIF) |
-| `IMReadBytes(data, ...ColorModel)` | Read image from bytes |
-| `IMWrite(path, mat, ...ColorModel)` | Write image to file |
 
-### Color
-| Method | Description |
-|--------|-------------|
-| `CvtColor(src, dst, code)` | Convert color space |
-| `PutText(img, text, org, font, scale, color, thickness)` | Draw text |
+- `IMRead`
+- `IMReadBytes`
+- `IMWrite`
 
-### Filtering
-| Method | Description |
-|--------|-------------|
-| `Blur(src, ksize)` | Box blur |
-| `GaussianBlur(src, ksize, sigmaX)` | Gaussian blur |
-| `MedianBlur(src, ksize)` | Median blur |
-| `EqualizeHist(src)` | Histogram equalization |
-| `Sobel(src, ddepth, dx, dy, ksize, scale, delta)` | Sobel derivative |
-| `Laplacian(src, ddepth, ksize, scale, delta)` | Laplacian |
-| `Threshold(src, thresh, maxval, typ)` | Binary threshold |
-| `AdaptiveThreshold(src, maxval, adaptiveType, threshType, blockSize, c)` | Adaptive threshold |
+### Processing
 
-### Morphology
-| Method | Description |
-|--------|-------------|
-| `Erode(src, kernel, anchor, iterations)` | Erosion |
-| `Dilate(src, kernel, anchor, iterations)` | Dilation |
-| `MorphologyEx(src, op, kernel, anchor, iterations)` | Open/Close/Gradient/TopHat/BlackHat |
-| `GetStructuringElement(shape, ksize)` | Create kernel (Rect/Cross/Ellipse) |
+- `CvtColor`
+- `Blur`, `GaussianBlur`, `MedianBlur`
+- `Threshold`, `AdaptiveThreshold`, `Canny`
+- `Resize`, `Flip`, `Transpose`, `WarpAffine`, `WarpPerspective`
 
-### Geometry
-| Method | Description |
-|--------|-------------|
-| `Resize(src, dst, size)` | Resize image |
-| `Flip(src, dst, flipCode)` | Flip (Horizontal/Vertical/Both) |
-| `Transpose(src)` | Transpose |
-| `WarpAffine(src, M, dsize)` | Affine warp |
-| `WarpPerspective(src, M, dsize)` | Perspective warp |
-| `GetRotationMatrix2D(center, angle, scale)` | 2D rotation matrix |
-| `GetAffineTransform(src, dst)` | Affine transform matrix |
+### Shape and drawing
 
-### Edge Detection
-| Method | Description |
-|--------|-------------|
-| `Canny(src, threshold1, threshold2)` | Canny edge detector |
+- `FindContours`, `DrawContours`, `ContourArea`, `BoundingRect`
+- `Rectangle`, `Circle`, `Line`, `ArrowedLine`, `PutText`
+- `HoughLines`, `HoughLinesP`, `HoughCircles`
 
-### Contours
-| Method | Description |
-|--------|-------------|
-| `FindContours(src, mode, method)` | Find contours in binary image |
-| `DrawContours(img, contours, idx, color, thickness)` | Draw contour outlines |
-| `ContourArea(contour)` | Compute contour area |
-| `ArcLength(contour, closed)` | Compute contour perimeter |
-| `BoundingRect(contour)` | Compute bounding rectangle |
-| `MinEnclosingCircle(contour)` | Compute minimum enclosing circle |
-| `Moments(contour, binary)` | Compute spatial moments |
+### Mat lifecycle
 
-### Hough Transforms
-| Method | Description |
-|--------|-------------|
-| `HoughLines(src, rho, theta, threshold)` | Standard Hough lines |
-| `HoughLinesP(src, rho, theta, threshold, minLen, maxGap)` | Probabilistic Hough lines |
-| `HoughCircles(src, method, dp, minDist, p1, p2, minR, maxR)` | Hough circles |
+- `NewMat`, `Zeros`, `Ones`, `Eye`
+- `Split`, `Merge`, `Region`, `Reshape`
+- explicit `Close()` and `Delete()` ownership flow
 
-### Drawing
-| Method | Description |
-|--------|-------------|
-| `Rectangle(img, rect, color, thickness)` | Draw rectangle |
-| `Circle(img, center, radius, color, thickness)` | Draw circle |
-| `Line(img, pt1, pt2, color, thickness)` | Draw line |
-| `PutText(img, text, org, font, scale, color, thickness)` | Draw text |
-| `ArrowedLine(img, pt1, pt2, color, thickness, tipLen)` | Draw arrow |
+The complete surface area is documented in [API_REFERENCE.md](API_REFERENCE.md).
 
-### Arithmetic & Logic
-| Method | Description |
-|--------|-------------|
-| `Add(src1, src2)` | Per-element addition |
-| `Subtract(src1, src2)` | Per-element subtraction |
-| `Multiply(src1, src2, scale)` | Per-element multiplication |
-| `Divide(src1, src2, scale)` | Per-element division |
-| `AbsDiff(src1, src2)` | Per-element absolute difference |
-| `BitwiseAnd/Or/Xor/Not` | Bitwise operations |
+## Runtime loading
 
-### Statistics
-| Method | Description |
-|--------|-------------|
-| `MinMaxLoc(src)` | Find min/max values and locations |
-| `MeanStdDev(src)` | Compute mean and standard deviation |
-| `CountNonZero(src)` | Count non-zero elements |
-| `Normalize(src, alpha, beta, normType)` | Normalize |
+`opencv.New()` follows a simple path:
 
-### Mat Operations
-| Method | Description |
-|--------|-------------|
-| `NewMat(rows, cols, typ)` | Create empty Mat |
-| `Zeros(rows, cols, typ)` | Create zero-initialized Mat |
-| `Ones(rows, cols, typ)` | Create ones-initialized Mat |
-| `Eye(rows, cols, typ)` | Create identity matrix |
-| `Split(src)` | Split multi-channel Mat |
-| `Merge(channels)` | Merge single-channel Mats |
-| `Row/Col/Region/Reshape` | Sub-matrix extraction |
+1. select the embedded native library for the active platform
+2. extract it into the user cache directory
+3. load it through purego
+4. bind the exported ABI symbols
 
-## Building the Native Backend
+You can override the embedded backend explicitly:
 
-Windows (MSVC x64):
+```go
+rt, err := opencv.New(ctx, opencv.WithDLL("/path/to/goopencv.dylib"))
+```
 
-```shell
+## Building native backends
+
+Native backend builds are platform-specific.
+
+### Windows
+
+```powershell
 build-tools\build-goopencv.bat
 ```
 
-This compiles `backend/goopencv_abi.cpp` against opencv-mobile 4.13.0 static libs and outputs `dist/goopencv.dll`.
+### Linux amd64
 
-## Running Tests
+```bash
+bash build-tools/build-goopencv-linux.sh
+```
 
-```shell
+### Linux arm64
+
+```bash
+bash build-tools/build-goopencv-linux-arm64.sh
+```
+
+### macOS universal
+
+```bash
+bash build-tools/build-goopencv-macos.sh
+```
+
+The macOS build script produces a universal `dist/goopencv.dylib` and verifies that both `x86_64` and `arm64` slices are present.
+
+All current release artifacts are built on top of `opencv-mobile 4.13.0`.
+
+## CI and releases
+
+GitHub Actions builds:
+
+- `goopencv.dll` for Windows `amd64`
+- `goopencv.so` for Linux `amd64`
+- `goopencv-linux-arm64.so` for Linux `arm64`
+- `goopencv.dylib` as a universal macOS artifact
+
+Release uploads publish the macOS binary as `goopencv-macos-universal.dylib`.
+
+## Testing
+
+```bash
 go test ./...
 ```
 
-## Running Examples
+For local validation, `scripts/verify-backend.ps1` will run Go tests and report the size of any native backend found in `dist/`.
 
-```shell
-cd examples
-go run . -demo=all
-```
+## Documentation
 
-## Color Model System
-
-By default, `IMRead` returns BGR (OpenCV native). Specify a model to change:
-
-```go
-bgr, _  := cv.IMRead("img.png")           // BGR (default)
-rgb, _  := cv.IMRead("img.png", cv.RGB)    // RGB
-rgba, _ := cv.IMRead("img.png", cv.RGBA)   // RGBA
-gray, _ := cv.IMRead("img.png", cv.Gray)   // Gray
-```
-
-Model metadata is tracked per-Mat. Processing ops preserve the source model. `CvtColor` determines the output model deterministically.
-
-Strict validation is available but off by default:
-
-```go
-opencv.SetStrictColorValidation(true)
-```
-
-## Architecture
-
-```
-Go application
-    |
-    v
-Runtime (runtime.go)           -- public API, Mat lifecycle, color metadata
-    |
-    v
-PuregoBackend (purego_backend.go) -- resolve DLL symbols via ebitengine/purego
-    |
-    v
-goopencv.dll (C++ ABI)          -- thin extern "C" wrappers calling cv:: functions
-    |
-    v
-opencv-mobile 4.13.0            -- static-linked OpenCV core + imgproc
-```
+- [SUPPORTED_PLATFORMS.md](SUPPORTED_PLATFORMS.md)
+- [API_REFERENCE.md](API_REFERENCE.md)
+- [docs/architecture.md](docs/architecture.md)
+- [docs/backend-abi.md](docs/backend-abi.md)
+- [docs/interface-contract.md](docs/interface-contract.md)
 
 ## License
 

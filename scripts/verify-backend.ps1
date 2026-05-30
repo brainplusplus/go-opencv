@@ -2,11 +2,11 @@ $ErrorActionPreference = "Stop"
 
 <#
 .SYNOPSIS
-Verify go-opencv: Go tests + optional backend wasm smoke test.
+Verify go-opencv: Go tests + optional native backend check.
 
 .DESCRIPTION
-Runs Go unit tests. If a wasm backend is found at dist\goopencv.wasm,
-also runs integration-level checks against it.
+Runs Go unit tests. If a native shared library is found in dist\,
+also shows its size.
 
 .EXAMPLE
 .\scripts\verify-backend.ps1
@@ -23,15 +23,21 @@ if ($LASTEXITCODE -ne 0) {
 
 Write-Host ""
 
-$wasmPath = Join-Path $repoRoot "dist\goopencv.wasm"
-if (Test-Path $wasmPath) {
-  Write-Host "=== Backend wasm found: $wasmPath ===" -ForegroundColor Cyan
-  $size = (Get-Item $wasmPath).Length
-  Write-Host "Size: $([math]::Round($size/1KB, 1)) KB"
-  Write-Host "Full integration test not yet implemented (needs backend with real exports)."
+$nativeCandidates = @(
+  (Join-Path $repoRoot "dist\goopencv.dll"),
+  (Join-Path $repoRoot "dist\goopencv.so"),
+  (Join-Path $repoRoot "dist\goopencv-linux-arm64.so"),
+  (Join-Path $repoRoot "dist\goopencv.dylib")
+)
+
+$nativePath = $nativeCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+if ($nativePath) {
+  Write-Host "=== Native backend found: $nativePath ===" -ForegroundColor Cyan
+  $size = (Get-Item $nativePath).Length
+  Write-Host "Size: $([math]::Round($size/1MB, 2)) MB"
 } else {
-  Write-Host "=== No dist\goopencv.wasm found. Skipping backend verification. ===" -ForegroundColor Yellow
-  Write-Host "Run scripts\build-backend.ps1 to produce one."
+  Write-Host "=== No native library found in dist\. Skipping backend verification. ===" -ForegroundColor Yellow
+  Write-Host "Run the platform build script in build-tools\ to produce one."
 }
 
 Write-Host ""
