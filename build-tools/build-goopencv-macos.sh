@@ -107,6 +107,7 @@ if [ -n "$FRAMEWORK_BIN" ]; then
         -o "${OUTPUT}" \
         -lpthread \
         -framework Cocoa \
+        -framework Accelerate \
         -install_name @rpath/goopencv.dylib
 else
     # No binary found — try dynamic framework link
@@ -120,6 +121,7 @@ else
         -o "${OUTPUT}" \
         -lpthread \
         -framework Cocoa \
+        -framework Accelerate \
         -install_name @rpath/goopencv.dylib
 fi
 

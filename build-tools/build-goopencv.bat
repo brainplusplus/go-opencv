@@ -59,14 +59,19 @@ set "INCLUDE_DIR=!OPENCV_ROOT!\!ARCH_DIR!\include"
 
 REM --- Detect staticlib path ---
 set "LIB_DIR="
-if exist "!OPENCV_ROOT!\!ARCH_DIR!\x64\vc17\staticlib\opencv_core4130.lib" (
-    set "LIB_DIR=!OPENCV_ROOT!\!ARCH_DIR!\x64\vc17\staticlib"
-)
-if exist "!OPENCV_ROOT!\!ARCH_DIR!\ARM64\vc17\staticlib\opencv_core4130.lib" (
-    set "LIB_DIR=!OPENCV_ROOT!\!ARCH_DIR!\ARM64\vc17\staticlib"
-)
-if exist "!OPENCV_ROOT!\!ARCH_DIR!\vc17\staticlib\opencv_core4130.lib" (
-    set "LIB_DIR=!OPENCV_ROOT!\!ARCH_DIR!\vc17\staticlib"
+for %%V in (vc17 vc16 vc15 vc14) do (
+    if exist "!OPENCV_ROOT!\!ARCH_DIR!\x64\%%V\staticlib\opencv_core4130.lib" (
+        set "LIB_DIR=!OPENCV_ROOT!\!ARCH_DIR!\x64\%%V\staticlib"
+    )
+    if exist "!OPENCV_ROOT!\!ARCH_DIR!\ARM64\%%V\staticlib\opencv_core4130.lib" (
+        set "LIB_DIR=!OPENCV_ROOT!\!ARCH_DIR!\ARM64\%%V\staticlib"
+    )
+    if exist "!OPENCV_ROOT!\!ARCH_DIR!\x86\%%V\staticlib\opencv_core4130.lib" (
+        set "LIB_DIR=!OPENCV_ROOT!\!ARCH_DIR!\x86\%%V\staticlib"
+    )
+    if exist "!OPENCV_ROOT!\!ARCH_DIR!\%%V\staticlib\opencv_core4130.lib" (
+        set "LIB_DIR=!OPENCV_ROOT!\!ARCH_DIR!\%%V\staticlib"
+    )
 )
 if "!LIB_DIR!"=="" (
     echo ERROR: staticlib not found
