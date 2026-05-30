@@ -1,15 +1,9 @@
-name: Build Native Libraries
+name: Release
 
 on:
   push:
-    branches: [main, master]
-    paths:
-      - 'backend/goopencv_abi.cpp'
-      - 'build-tools/**'
-      - '.github/workflows/build-native.yml'
-  pull_request:
-    branches: [main, master]
-  workflow_dispatch:
+    tags:
+      - 'v*'
 
 permissions:
   contents: write
@@ -19,7 +13,7 @@ env:
 
 jobs:
   build:
-    name: ${{ matrix.platform.name }}
+    name: Build ${{ matrix.platform.name }}
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       fail-fast: false
@@ -29,18 +23,22 @@ jobs:
             runner: windows-2022
             artifact: goopencv-windows-amd64
             output: dist/goopencv.dll
+            asset-name: goopencv-windows-amd64.dll
           - name: linux-amd64
             runner: ubuntu-22.04
             artifact: goopencv-linux-amd64
             output: dist/goopencv.so
+            asset-name: goopencv-linux-amd64.so
           - name: linux-arm64
             runner: ubuntu-24.04-arm
             artifact: goopencv-linux-arm64
             output: dist/goopencv-linux-arm64.so
+            asset-name: goopencv-linux-arm64.so
           - name: macos-universal
             runner: macos-14
             artifact: goopencv-macos-universal
             output: dist/goopencv.dylib
+            asset-name: goopencv-macos-universal.dylib
 
     steps:
       - uses: actions/checkout@v4
@@ -97,50 +95,43 @@ jobs:
         if: matrix.platform.name == 'macos-universal'
         run: bash build-tools/build-goopencv-macos.sh
 
-      # ── Upload artifact ──────────────────────────────────────
-      - name: Upload artifact
+      # ── Upload artifact for release job ──────────────────────
+      - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.platform.artifact }}
           path: ${{ matrix.platform.output }}
           compression-level: 0
 
-  # ── Go test on available runners ──────────────────────────
-  test:
-    name: Go Test (${{ matrix.platform.name }})
-    runs-on: ${{ matrix.platform.runner }}
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
     needs: build
-    strategy:
-      fail-fast: false
-      matrix:
-        platform:
-          - name: windows-amd64
-            runner: windows-2022
-            artifact: goopencv-windows-amd64
-            native-lib: goopencv.dll
-          - name: linux-amd64
-            runner: ubuntu-22.04
-            artifact: goopencv-linux-amd64
-            native-lib: goopencv.so
-          - name: macos-arm64
-            runner: macos-14
-            artifact: goopencv-macos-universal
-            native-lib: goopencv.dylib
-
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-go@v5
-        with:
-          go-version: '1.24'
-
-      - name: Download native library
+      - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          name: ${{ matrix.platform.artifact }}
-          path: dist/
+          path: release-assets/
+          merge-multiple: false
 
-      - name: Run Go tests
+      - name: Prepare release assets
+        run: |
+          mkdir -p release-upload/
+          cp release-assets/goopencv-windows-amd64/goopencv.dll release-upload/goopencv-windows-amd64.dll
+          cp release-assets/goopencv-linux-amd64/goopencv.so release-upload/goopencv-linux-amd64.so
+          cp release-assets/goopencv-linux-arm64/goopencv-linux-arm64.so release-upload/goopencv-linux-arm64.so
+          cp release-assets/goopencv-macos-universal/goopencv.dylib release-upload/goopencv-macos-universal.dylib
+          ls -lh release-upload/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: release-upload/*
         env:
-          CGO_ENABLED: 0
-        run: go test ./... -v -count=1
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

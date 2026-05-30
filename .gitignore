@@ -14,6 +14,8 @@ dist/goopencv.dylib
 # opencv-mobile SDK (large zip, extracted dir)
 build-tools/opencv-mobile-4.13.0-windows-vs2022/
 build-tools/opencv-mobile-*-ubuntu-*/
+build-tools/opencv-mobile-*-debian-*/
+build-tools/opencv-mobile-*-macos/
 build-tools/opencv-mobile-*.zip
 
 # References (internal design docs, not for public)
