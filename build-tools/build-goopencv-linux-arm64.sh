@@ -34,6 +34,7 @@ echo "Output:  ${OUTPUT}"
 mkdir -p dist
 
 g++ -shared -O2 -fPIC -std=c++11 \
+    -fopenmp \
     -I"${OPENCV_ROOT}/include/opencv4" \
     "${SOURCE}" \
     -o "${OUTPUT}" \
