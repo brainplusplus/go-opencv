@@ -22,27 +22,79 @@ if [ ! -d "build-tools/${OPENCV_PKG}" ]; then
     echo "Downloaded and extracted."
 fi
 
-OPENCV_ROOT="build-tools/${OPENCV_PKG}"
-FRAMEWORK="${OPENCV_ROOT}/opencv2.framework"
-FRAMEWORK_BIN="${FRAMEWORK}/opencv2"
+# Find the framework — may be at different nesting levels
+# e.g., build-tools/PKG/opencv2.framework or build-tools/PKG/PKG/opencv2.framework
+FRAMEWORK=""
+for candidate in \
+    "build-tools/${OPENCV_PKG}/opencv2.framework" \
+    "build-tools/${OPENCV_PKG}/${OPENCV_PKG}/opencv2.framework" \
+    "build-tools/${OPENCV_PKG}/opencv-mobile-${OPENCV_VERSION}-macos/opencv2.framework"
+do
+    if [ -d "$candidate" ]; then
+        FRAMEWORK="$candidate"
+        break
+    fi
+done
+
+if [ -z "$FRAMEWORK" ]; then
+    echo "ERROR: opencv2.framework not found in build-tools/${OPENCV_PKG}/"
+    echo "Directory contents:"
+    find "build-tools/${OPENCV_PKG}/" -maxdepth 3 -type d 2>/dev/null | head -20
+    exit 1
+fi
+
+# Find the framework binary — could be at Versions/A/opencv2 or directly opencv2
+FRAMEWORK_BIN=""
+for bin_candidate in \
+    "${FRAMEWORK}/Versions/A/opencv2" \
+    "${FRAMEWORK}/Versions/Current/opencv2" \
+    "${FRAMEWORK}/opencv2"
+do
+    if [ -f "$bin_candidate" ] || [ -L "$bin_candidate" ]; then
+        FRAMEWORK_BIN="$bin_candidate"
+        break
+    fi
+done
+
+# Find headers
+HEADER_DIR=""
+for h_candidate in \
+    "${FRAMEWORK}/Headers" \
+    "${FRAMEWORK}/Versions/A/Headers" \
+    "${FRAMEWORK}/Versions/Current/Headers"
+do
+    if [ -d "$h_candidate" ]; then
+        HEADER_DIR="$h_candidate"
+        break
+    fi
+done
+
 OUTPUT="dist/goopencv.dylib"
 SOURCE="backend/goopencv_abi.cpp"
 
 echo "=== Compiling goopencv.dylib ==="
-echo "Source:    ${SOURCE}"
-echo "Framework: ${FRAMEWORK}"
-echo "Output:    ${OUTPUT}"
+echo "Source:      ${SOURCE}"
+echo "Framework:   ${FRAMEWORK}"
+echo "Binary:      ${FRAMEWORK_BIN}"
+echo "Headers:     ${HEADER_DIR}"
+echo "Output:      ${OUTPUT}"
 
 mkdir -p dist
 
-# Detect framework type: static archive vs dynamic library
-FRAMEWORK_TYPE=$(file "${FRAMEWORK_BIN}" 2>/dev/null || echo "unknown")
-echo "Framework binary type: ${FRAMEWORK_TYPE}"
+if [ -z "$HEADER_DIR" ]; then
+    echo "ERROR: Framework headers not found"
+    find "${FRAMEWORK}" -maxdepth 3 -type d 2>/dev/null
+    exit 1
+fi
 
-if echo "${FRAMEWORK_TYPE}" | grep -q "archive\|current ar archive"; then
-    echo ">>> Static framework detected — using -force_load for standalone dylib"
+if [ -n "$FRAMEWORK_BIN" ]; then
+    FRAMEWORK_TYPE=$(file "${FRAMEWORK_BIN}" 2>/dev/null || echo "unknown")
+    echo "Framework binary type: ${FRAMEWORK_TYPE}"
+
+    # Use -force_load to statically link all symbols (standalone dylib)
+    echo ">>> Using -force_load for standalone dylib"
     clang++ -shared -O2 -fPIC -std=c++11 \
-        -I"${FRAMEWORK}/Headers" \
+        -I"${HEADER_DIR}" \
         -force_load "${FRAMEWORK_BIN}" \
         "${SOURCE}" \
         -o "${OUTPUT}" \
@@ -50,12 +102,13 @@ if echo "${FRAMEWORK_TYPE}" | grep -q "archive\|current ar archive"; then
         -framework Cocoa \
         -install_name @rpath/goopencv.dylib
 else
-    echo ">>> Dynamic framework detected — using -force_load (may work on universal Mach-O)"
-    # -force_load works on both static archives and Mach-O universal binaries.
-    # It forces all symbols to be loaded, effectively static-linking the framework.
+    # No binary found — try dynamic framework link
+    echo ">>> No framework binary found, trying dynamic -framework link"
+    FRAMEWORK_DIR=$(dirname "${FRAMEWORK}")
     clang++ -shared -O2 -fPIC -std=c++11 \
-        -I"${FRAMEWORK}/Headers" \
-        -force_load "${FRAMEWORK_BIN}" \
+        -I"${HEADER_DIR}" \
+        -F"${FRAMEWORK_DIR}" \
+        -framework opencv2 \
         "${SOURCE}" \
         -o "${OUTPUT}" \
         -lpthread \
@@ -70,17 +123,6 @@ DYLIB_DEPS=$(otool -L "${OUTPUT}" 2>/dev/null || true)
 if echo "${DYLIB_DEPS}" | grep -q "opencv2"; then
     echo "WARNING: goopencv.dylib still has dynamic dependency on opencv2!"
     echo "  ${DYLIB_DEPS}" | grep "opencv2"
-    echo ""
-    echo "Falling back to @loader_path approach..."
-    # Change the opencv2 reference to @loader_path so it looks next to the dylib
-    INSTALL_NAME=$(otool -L "${OUTPUT}" | grep "opencv2" | awk '{print $1}' | tr -d '[:space:]')
-    if [ -n "${INSTALL_NAME}" ]; then
-        install_name_tool -change "${INSTALL_NAME}" @loader_path/opencv2 "${OUTPUT}"
-        # Copy the framework binary next to goopencv.dylib
-        cp "${FRAMEWORK_BIN}" "dist/opencv2"
-        echo "Copied opencv2 binary to dist/opencv2"
-        echo "You must embed BOTH dist/goopencv.dylib and dist/opencv2 in the Go binary."
-    fi
 else
     echo "✅ goopencv.dylib is standalone — no opencv2 runtime dependency"
 fi

@@ -37,7 +37,11 @@ if defined VSCMD_VER (
 )
 
 REM --- Resolve paths ---
+REM SDK may be at build-tools/PKG/ or build-tools/PKG/PKG/ (depending on zip structure)
 set "OPENCV_ROOT=%REPO_ROOT%\build-tools\opencv-mobile-4.13.0-windows-vs2022\opencv-mobile-4.13.0-windows-vs2022"
+if not exist "%OPENCV_ROOT%" (
+    set "OPENCV_ROOT=%REPO_ROOT%\build-tools\opencv-mobile-4.13.0-windows-vs2022"
+)
 set "INCLUDE_DIR=%OPENCV_ROOT%\x64\include"
 set "LIB_DIR=%OPENCV_ROOT%\x64\x64\vc17\staticlib"
 set "OUTPUT=%REPO_ROOT%\dist\goopencv.dll"

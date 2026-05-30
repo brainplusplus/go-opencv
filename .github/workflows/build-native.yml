@@ -95,7 +95,7 @@ jobs:
 
       - name: Debug macOS SDK structure
         if: matrix.platform.name == 'macos-universal'
-        run: find build-tools/opencv-mobile-* -maxdepth 4 -type f -o -type l | head -30
+        run: find build-tools/ -maxdepth 5 -type f 2>/dev/null | head -40
 
       - name: Build goopencv.dylib (macOS)
         if: matrix.platform.name == 'macos-universal'
