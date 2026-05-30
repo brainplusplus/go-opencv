@@ -59,7 +59,10 @@ jobs:
       - name: Debug Windows SDK structure
         if: matrix.platform.name == 'windows-amd64'
         shell: pwsh
-        run: Get-ChildItem -Path "build-tools\opencv-mobile-*" -Recurse -Directory | Select-Object -First 20 | ForEach-Object { $_.FullName }
+        run: |
+          Get-ChildItem -Path "build-tools\opencv-mobile-*" -Directory | ForEach-Object { $_.FullName }
+          $sdk = Get-ChildItem -Path "build-tools\opencv-mobile-*" -Directory | Select-Object -First 1
+          if ($sdk) { Get-ChildItem $sdk.FullName -Directory | ForEach-Object { $_.FullName } }
 
       - name: Build goopencv.dll (Windows)
         if: matrix.platform.name == 'windows-amd64'
