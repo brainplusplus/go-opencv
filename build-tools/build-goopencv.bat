@@ -42,8 +42,34 @@ set "OPENCV_ROOT=%REPO_ROOT%\build-tools\opencv-mobile-4.13.0-windows-vs2022\ope
 if not exist "%OPENCV_ROOT%" (
     set "OPENCV_ROOT=%REPO_ROOT%\build-tools\opencv-mobile-4.13.0-windows-vs2022"
 )
-set "INCLUDE_DIR=%OPENCV_ROOT%\x64\include"
-set "LIB_DIR=%OPENCV_ROOT%\x64\x64\vc17\staticlib"
+
+REM --- Detect architecture subdirectory (x64 or arm64) ---
+set "ARCH_DIR="
+if exist "%OPENCV_ROOT%\x64" (
+    set "ARCH_DIR=x64"
+) else if exist "%OPENCV_ROOT%\arm64" (
+    set "ARCH_DIR=arm64"
+) else (
+    echo ERROR: No x64 or arm64 directory found in %OPENCV_ROOT%
+    dir "%OPENCV_ROOT%" 2>nul
+    exit /b 1
+)
+
+set "INCLUDE_DIR=%OPENCV_ROOT%\%ARCH_DIR%\include"
+
+REM Detect staticlib path (x64\x64\vc17\staticlib or arm64\ARM64\vc17\staticlib)
+set "LIB_DIR="
+if exist "%OPENCV_ROOT%\%ARCH_DIR%\x64\vc17\staticlib" (
+    set "LIB_DIR=%OPENCV_ROOT%\%ARCH_DIR%\x64\vc17\staticlib"
+) else if exist "%OPENCV_ROOT%\%ARCH_DIR%\ARM64\vc17\staticlib" (
+    set "LIB_DIR=%OPENCV_ROOT%\%ARCH_DIR%\ARM64\vc17\staticlib"
+) else if exist "%OPENCV_ROOT%\%ARCH_DIR%\vc17\staticlib" (
+    set "LIB_DIR=%OPENCV_ROOT%\%ARCH_DIR%\vc17\staticlib"
+) else (
+    echo ERROR: staticlib not found
+    dir /s /b "%OPENCV_ROOT%\%ARCH_DIR%\*staticlib" 2>nul
+    exit /b 1
+)
 set "OUTPUT=%REPO_ROOT%\dist\goopencv.dll"
 set "SOURCE=%REPO_ROOT%\backend\goopencv_abi.cpp"
 

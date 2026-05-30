@@ -87,6 +87,17 @@ if [ -z "$HEADER_DIR" ]; then
     exit 1
 fi
 
+# Create opencv2 symlink in Headers dir so #include <opencv2/core.hpp> resolves.
+# Framework headers are directly in Headers/ (e.g., Headers/core.hpp) but
+# the code uses #include <opencv2/core.hpp>, so we need Headers/opencv2 -> .
+if [ ! -d "${HEADER_DIR}/opencv2" ]; then
+    ln -s . "${HEADER_DIR}/opencv2"
+fi
+
+# Use parent of HEADER_DIR as include path so <opencv2/core.hpp> resolves
+# HEADER_DIR = .../Headers, parent contains opencv2/ symlink -> ./core.hpp
+INCLUDE_DIR=$(dirname "${HEADER_DIR}")
+
 if [ -n "$FRAMEWORK_BIN" ]; then
     FRAMEWORK_TYPE=$(file "${FRAMEWORK_BIN}" 2>/dev/null || echo "unknown")
     echo "Framework binary type: ${FRAMEWORK_TYPE}"
@@ -94,7 +105,7 @@ if [ -n "$FRAMEWORK_BIN" ]; then
     # Use -force_load to statically link all symbols (standalone dylib)
     echo ">>> Using -force_load for standalone dylib"
     clang++ -shared -O2 -fPIC -std=c++11 \
-        -I"${HEADER_DIR}" \
+        -I"${INCLUDE_DIR}" \
         -force_load "${FRAMEWORK_BIN}" \
         "${SOURCE}" \
         -o "${OUTPUT}" \
@@ -106,7 +117,7 @@ else
     echo ">>> No framework binary found, trying dynamic -framework link"
     FRAMEWORK_DIR=$(dirname "${FRAMEWORK}")
     clang++ -shared -O2 -fPIC -std=c++11 \
-        -I"${HEADER_DIR}" \
+        -I"${INCLUDE_DIR}" \
         -F"${FRAMEWORK_DIR}" \
         -framework opencv2 \
         "${SOURCE}" \
