@@ -93,6 +93,10 @@ jobs:
           unzip -q -o /tmp/opencv-mobile.zip -d build-tools/
           rm /tmp/opencv-mobile.zip
 
+      - name: Debug macOS SDK structure
+        if: matrix.platform.name == 'macos-universal'
+        run: find build-tools/opencv-mobile-* -maxdepth 4 -type f -o -type l | head -30
+
       - name: Build goopencv.dylib (macOS)
         if: matrix.platform.name == 'macos-universal'
         run: bash build-tools/build-goopencv-macos.sh

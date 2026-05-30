@@ -4,8 +4,14 @@ REM Works both locally and in CI (GitHub Actions windows-2022 runner)
 
 setlocal enabledelayedexpansion
 
-REM --- Detect repo root (parent of build-tools/) ---
-set "REPO_ROOT=%~dp0.."
+REM --- Detect repo root ---
+REM CI sets GITHUB_WORKSPACE. Locally, derive from script location.
+if defined GITHUB_WORKSPACE (
+    set "REPO_ROOT=%GITHUB_WORKSPACE%"
+) else (
+    REM %~dp0 ends with trailing backslash, so parent = %~dp0..
+    set "REPO_ROOT=%~dp0.."
+)
 
 REM --- Setup MSVC (CI has it at a standard path, local has it at a specific path) ---
 if defined VSCMD_VER (
@@ -30,16 +36,23 @@ if defined VSCMD_VER (
     )
 )
 
-REM --- Resolve paths relative to repo root ---
+REM --- Resolve paths ---
 set "OPENCV_ROOT=%REPO_ROOT%\build-tools\opencv-mobile-4.13.0-windows-vs2022\opencv-mobile-4.13.0-windows-vs2022"
 set "INCLUDE_DIR=%OPENCV_ROOT%\x64\include"
 set "LIB_DIR=%OPENCV_ROOT%\x64\x64\vc17\staticlib"
 set "OUTPUT=%REPO_ROOT%\dist\goopencv.dll"
 set "SOURCE=%REPO_ROOT%\backend\goopencv_abi.cpp"
 
+REM Debug: show resolved paths
+echo REPO_ROOT: %REPO_ROOT%
+echo OPENCV_ROOT: %OPENCV_ROOT%
+
 if not exist "%OPENCV_ROOT%" (
     echo ERROR: opencv-mobile SDK not found at %OPENCV_ROOT%
     echo Download from https://github.com/nihui/opencv-mobile/releases/latest/download/opencv-mobile-4.13.0-windows-vs2022.zip
+    echo.
+    echo Listing build-tools directory:
+    dir "%REPO_ROOT%\build-tools\" 2>nul || echo (directory empty or missing)
     exit /b 1
 )
 
