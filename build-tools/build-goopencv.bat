@@ -38,6 +38,10 @@ set "OPENCV_ROOT=%REPO_ROOT%\build-tools\opencv-mobile-4.13.0-windows-vs2022\ope
 if exist "!OPENCV_ROOT!" goto :found_root
 set "OPENCV_ROOT=%REPO_ROOT%\build-tools\opencv-mobile-4.13.0-windows-vs2022"
 if exist "!OPENCV_ROOT!" goto :found_root
+set "OPENCV_ROOT=%REPO_ROOT%\build-tools\opencv-mobile-4.13.0-windows-vs2019\opencv-mobile-4.13.0-windows-vs2019"
+if exist "!OPENCV_ROOT!" goto :found_root
+set "OPENCV_ROOT=%REPO_ROOT%\build-tools\opencv-mobile-4.13.0-windows-vs2019"
+if exist "!OPENCV_ROOT!" goto :found_root
 echo ERROR: opencv-mobile SDK not found
 exit /b 1
 :found_root

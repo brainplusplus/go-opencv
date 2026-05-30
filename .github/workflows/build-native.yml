@@ -50,7 +50,7 @@ jobs:
         if: matrix.platform.name == 'windows-amd64'
         shell: pwsh
         run: |
-          $zip = "opencv-mobile-${env:OPENCV_VERSION}-windows-vs2022.zip"
+          $zip = "opencv-mobile-${env:OPENCV_VERSION}-windows-vs2019.zip"
           $url = "https://github.com/nihui/opencv-mobile/releases/latest/download/$zip"
           Invoke-WebRequest -Uri $url -OutFile "build-tools/$zip"
           Expand-Archive "build-tools/$zip" -DestinationPath "build-tools/"
