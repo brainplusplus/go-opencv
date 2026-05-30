@@ -46,10 +46,16 @@ echo ERROR: opencv-mobile SDK not found
 exit /b 1
 :found_root
 
-REM --- Detect arch directory (x64 or arm64) ---
+REM --- Detect arch directory (x64 first for amd64 target, then arm64) ---
 set "ARCH_DIR="
-if exist "!OPENCV_ROOT!\x64" set "ARCH_DIR=x64"
-if exist "!OPENCV_ROOT!\arm64" set "ARCH_DIR=arm64"
+if exist "!OPENCV_ROOT!\x64" (
+    set "ARCH_DIR=x64"
+)
+if "!ARCH_DIR!"=="" (
+    if exist "!OPENCV_ROOT!\arm64" (
+        set "ARCH_DIR=arm64"
+    )
+)
 if "!ARCH_DIR!"=="" (
     echo ERROR: No x64 or arm64 directory found in !OPENCV_ROOT!
     exit /b 1
@@ -91,6 +97,10 @@ echo ARCH_DIR:    !ARCH_DIR!
 echo INCLUDE:     !INCLUDE_DIR!
 echo LIB:         !LIB_DIR!
 echo Output:      !OUTPUT!
+echo Checking x64: 
+if exist "!OPENCV_ROOT!\x64" (echo FOUND x64) else (echo NOT FOUND x64)
+echo Checking arm64:
+if exist "!OPENCV_ROOT!\arm64" (echo FOUND arm64) else (echo NOT FOUND arm64)
 echo.
 
 cl /LD /nologo /O2 /utf-8 /W3 /EHsc /MD /utf-8 ^
