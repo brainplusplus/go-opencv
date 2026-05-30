@@ -24,11 +24,13 @@ fi
 OPENCV_ROOT="build-tools/${OPENCV_PKG}"
 OUTPUT="dist/goopencv-linux-arm64.so"
 SOURCE="backend/goopencv_abi.cpp"
+THIRDPARTY_DIR="${OPENCV_ROOT}/lib/opencv4/3rdparty"
 
 echo "=== Compiling goopencv.so (arm64) ==="
 echo "Source:  ${SOURCE}"
 echo "Include: ${OPENCV_ROOT}/include/opencv4"
 echo "Lib:     ${OPENCV_ROOT}/lib"
+echo "3rdparty:${THIRDPARTY_DIR}"
 echo "Output:  ${OUTPUT}"
 
 mkdir -p dist
@@ -39,6 +41,7 @@ g++ -shared -O2 -fPIC -std=c++11 \
     "${SOURCE}" \
     -o "${OUTPUT}" \
     -L"${OPENCV_ROOT}/lib" \
+    -L"${THIRDPARTY_DIR}" \
     -Wl,--start-group \
     -lopencv_core \
     -lopencv_imgproc \
@@ -46,6 +49,9 @@ g++ -shared -O2 -fPIC -std=c++11 \
     -lopencv_photo \
     -lopencv_highgui \
     -lopencv_video \
+    -lkleidicv \
+    -lkleidicv_thread \
+    -lkleidicv_hal \
     -Wl,--end-group \
     -lpthread
 
