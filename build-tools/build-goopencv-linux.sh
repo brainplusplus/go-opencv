@@ -37,11 +37,14 @@ g++ -shared -O2 -fPIC -std=c++11 \
     "${SOURCE}" \
     -o "${OUTPUT}" \
     -L"${OPENCV_ROOT}/lib" \
+    -Wl,--start-group \
     -lopencv_core \
     -lopencv_imgproc \
     -lopencv_features2d \
     -lopencv_photo \
     -lopencv_highgui \
+    -lopencv_video \
+    -Wl,--end-group \
     -lpthread
 
 echo ""
