@@ -1,14 +1,15 @@
 # Supported Platforms
 
-go-opencv ships prebuilt native libraries for five runtime targets, with a universal macOS dylib covering both Intel and Apple Silicon.
+go-opencv ships prebuilt native libraries for six runtime targets, with a universal macOS dylib covering both Intel and Apple Silicon.
 
 | # | GOOS | GOARCH | Native Library | Target Hardware |
 |---|------|--------|----------------|-----------------|
 | 1 | `windows` | `amd64` | `goopencv.dll` | Windows x64 |
-| 2 | `linux` | `amd64` | `goopencv.so` | Linux x64 (glibc 2.35+) |
-| 3 | `linux` | `arm64` | `goopencv-linux-arm64.so` | Linux ARM64 (RPi 5, AWS Graviton, Jetson) |
-| 4 | `darwin` | `amd64` | `goopencv.dylib` | Intel Mac |
-| 5 | `darwin` | `arm64` | `goopencv.dylib` | Apple Silicon |
+| 2 | `windows` | `arm64` | `goopencv.dll` | Windows on ARM |
+| 3 | `linux` | `amd64` | `goopencv.so` | Linux x64 (glibc 2.35+) |
+| 4 | `linux` | `arm64` | `goopencv-linux-arm64.so` | Linux ARM64 (RPi 5, AWS Graviton, Jetson) |
+| 5 | `darwin` | `amd64` | `goopencv.dylib` | Intel Mac |
+| 6 | `darwin` | `arm64` | `goopencv.dylib` | Apple Silicon |
 
 ## macOS Universal Build
 
@@ -19,7 +20,7 @@ The macOS artifact is a single universal `goopencv.dylib` with both `x86_64` and
 If you run on an unsupported platform, `opencv.New()` returns:
 
 ```
-opencv: backend unavailable (supported: windows/amd64, linux/amd64, linux/arm64, darwin/amd64, darwin/arm64)
+opencv: backend unavailable (supported: windows/amd64, windows/arm64, linux/amd64, linux/arm64, darwin/amd64, darwin/arm64)
 ```
 
 ## Autoload

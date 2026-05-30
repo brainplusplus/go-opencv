@@ -1,17 +1,45 @@
-<svg width="720" height="200" viewBox="0 0 720 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="720" height="200" rx="28" fill="#0F172A"/>
-  <rect x="24" y="24" width="672" height="152" rx="24" fill="#111827" stroke="#1F2937" stroke-width="2"/>
-  <circle cx="122" cy="100" r="48" fill="#0B1220" stroke="#34D399" stroke-width="10"/>
-  <circle cx="122" cy="100" r="21" fill="#34D399"/>
-  <path d="M82 100C82 77.9086 99.9086 60 122 60" stroke="#F59E0B" stroke-width="10" stroke-linecap="round"/>
-  <path d="M162 100C162 122.091 144.091 140 122 140" stroke="#38BDF8" stroke-width="10" stroke-linecap="round"/>
-  <path d="M191 136L228 64" stroke="#38BDF8" stroke-width="12" stroke-linecap="round"/>
-  <path d="M228 64H266C293.614 64 316 86.3858 316 114V136" stroke="#38BDF8" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M228 136H286" stroke="#F59E0B" stroke-width="12" stroke-linecap="round"/>
-  <text x="344" y="88" fill="#F8FAFC" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="34" font-weight="700">go-opencv</text>
-  <text x="344" y="123" fill="#94A3B8" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="500">CGO-free OpenCV for Go with embedded native runtimes</text>
-  <rect x="344" y="140" width="118" height="26" rx="13" fill="#0B1220" stroke="#233044"/>
-  <text x="365" y="158" fill="#34D399" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700">PUREGO</text>
-  <rect x="474" y="140" width="156" height="26" rx="13" fill="#0B1220" stroke="#233044"/>
-  <text x="496" y="158" fill="#38BDF8" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700">UNIVERSAL MACOS</text>
+<svg width="960" height="240" viewBox="0 0 960 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="960" height="240" rx="32" fill="#0B1220"/>
+  <rect x="20" y="20" width="920" height="200" rx="28" fill="#111827" stroke="#1F2937" stroke-width="2"/>
+
+  <g transform="translate(56 38)">
+    <circle cx="86" cy="38" r="18" fill="#EF4444"/>
+    <circle cx="34" cy="128" r="18" fill="#22C55E"/>
+    <circle cx="138" cy="128" r="18" fill="#2563EB"/>
+
+    <path d="M86 38 L41 116" stroke="#0F172A" stroke-width="18" stroke-linecap="round"/>
+    <path d="M86 38 L131 116" stroke="#0F172A" stroke-width="18" stroke-linecap="round"/>
+
+    <path d="M86 18
+             A68 68 0 1 1 145 87"
+          stroke="#FF2A23" stroke-width="28" stroke-linecap="square" fill="none"/>
+    <path d="M22 146
+             A68 68 0 1 1 108 111"
+          stroke="#24FF00" stroke-width="28" stroke-linecap="square" fill="none"/>
+    <path d="M150 111
+             A68 68 0 1 1 150 145"
+          stroke="#1A00FF" stroke-width="28" stroke-linecap="square" fill="none"/>
+
+    <circle cx="86" cy="38" r="9" fill="#0B1220"/>
+    <circle cx="34" cy="128" r="9" fill="#0B1220"/>
+    <circle cx="138" cy="128" r="9" fill="#0B1220"/>
+
+    <path d="M191 128C191 95.9675 216.968 70 249 70H273V98H249C232.432 98 219 111.432 219 128C219 144.568 232.432 158 249 158H273V186H249C216.968 186 191 160.032 191 128Z" fill="#7DD3FC"/>
+    <circle cx="311" cy="128" r="58" stroke="#7DD3FC" stroke-width="28"/>
+    <circle cx="311" cy="128" r="10" fill="#111827"/>
+  </g>
+
+  <g transform="translate(430 58)">
+    <text x="0" y="64" fill="#F8FAFC" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="44" font-weight="800">go-opencv</text>
+    <text x="0" y="102" fill="#94A3B8" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20" font-weight="500">CGO-free OpenCV for Go with embedded native runtimes</text>
+
+    <rect x="0" y="126" width="138" height="32" rx="16" fill="#0B1220" stroke="#233044"/>
+    <text x="22" y="147" fill="#7DD3FC" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700">PUREGO</text>
+
+    <rect x="152" y="126" width="180" height="32" rx="16" fill="#0B1220" stroke="#233044"/>
+    <text x="173" y="147" fill="#22C55E" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700">WINDOWS ARM64</text>
+
+    <rect x="346" y="126" width="192" height="32" rx="16" fill="#0B1220" stroke="#233044"/>
+    <text x="367" y="147" fill="#38BDF8" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="700">UNIVERSAL MACOS</text>
+  </g>
 </svg>

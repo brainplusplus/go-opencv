@@ -238,6 +238,7 @@ All 115 functional APIs are fully wired and tested. Only HighGUI windowing (ImSh
 
 | Platform | GOARCH | Supported |
 |----------|--------|-----------|
+| Windows | arm64 | ✅ |
 | Windows | amd64 | ✅ |
 | Linux | amd64 | ✅ |
 | Linux | arm64 | ✅ |

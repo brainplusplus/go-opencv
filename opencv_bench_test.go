@@ -9,7 +9,7 @@ import (
 func BenchmarkCvtColor_BGR2Gray_1080p(b *testing.B) {
 	path := dllPath()
 	if path == "" {
-		b.Skip("goopencv.dll not found")
+		b.Skip("native backend not found")
 	}
 
 	r, err := New(context.Background(), WithDLL(path))
@@ -41,7 +41,7 @@ func BenchmarkCvtColor_BGR2Gray_1080p(b *testing.B) {
 func BenchmarkPipeline_NoConvert_1080p(b *testing.B) {
 	path := dllPath()
 	if path == "" {
-		b.Skip("goopencv.dll not found")
+		b.Skip("native backend not found")
 	}
 
 	r, err := New(context.Background(), WithDLL(path))
@@ -73,7 +73,7 @@ func BenchmarkPipeline_NoConvert_1080p(b *testing.B) {
 func BenchmarkCvtColor_BGR2RGBA_1080p(b *testing.B) {
 	path := dllPath()
 	if path == "" {
-		b.Skip("goopencv.dll not found")
+		b.Skip("native backend not found")
 	}
 
 	r, err := New(context.Background(), WithDLL(path))
@@ -105,7 +105,7 @@ func BenchmarkCvtColor_BGR2RGBA_1080p(b *testing.B) {
 func BenchmarkCvtColor_BGR2RGBA_4K(b *testing.B) {
 	path := dllPath()
 	if path == "" {
-		b.Skip("goopencv.dll not found")
+		b.Skip("native backend not found")
 	}
 
 	r, err := New(context.Background(), WithDLL(path))
@@ -137,7 +137,7 @@ func BenchmarkCvtColor_BGR2RGBA_4K(b *testing.B) {
 func BenchmarkIMWrite_PNG_1080p_ModelOverrideRGBA(b *testing.B) {
 	path := dllPath()
 	if path == "" {
-		b.Skip("goopencv.dll not found")
+		b.Skip("native backend not found")
 	}
 
 	r, err := New(context.Background(), WithDLL(path))
@@ -166,7 +166,7 @@ func BenchmarkIMWrite_PNG_1080p_ModelOverrideRGBA(b *testing.B) {
 func BenchmarkIMWrite_JPEG_1080p_ModelOverrideRGBA(b *testing.B) {
 	path := dllPath()
 	if path == "" {
-		b.Skip("goopencv.dll not found")
+		b.Skip("native backend not found")
 	}
 
 	r, err := New(context.Background(), WithDLL(path))

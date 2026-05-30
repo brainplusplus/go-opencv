@@ -23,6 +23,7 @@ The project uses [nihui/opencv-mobile](https://github.com/nihui/opencv-mobile) *
 - Embedded native runtimes with automatic cache extraction
 - Real OpenCV execution, not a partial pure-Go imitation
 - Cross-platform release assets for Windows, Linux, and macOS
+- Windows support for both `amd64` and `arm64`
 - Universal macOS dylib with both `x86_64` and `arm64` slices
 - Familiar OpenCV-style API for image I/O, color conversion, filtering, geometry, contours, drawing, and more
 
@@ -31,6 +32,7 @@ The project uses [nihui/opencv-mobile](https://github.com/nihui/opencv-mobile) *
 | Platform | GOARCH | Artifact | Status |
 |---|---|---|---|
 | Windows | `amd64` | `goopencv.dll` | Supported |
+| Windows | `arm64` | `goopencv.dll` | Supported |
 | Linux | `amd64` | `goopencv.so` | Supported |
 | Linux | `arm64` | `goopencv-linux-arm64.so` | Supported |
 | macOS | `amd64` | `goopencv.dylib` | Supported via universal dylib |
@@ -161,6 +163,7 @@ All current release artifacts are built on top of `opencv-mobile 4.13.0`.
 GitHub Actions builds:
 
 - `goopencv.dll` for Windows `amd64`
+- `goopencv.dll` for Windows `arm64`
 - `goopencv.so` for Linux `amd64`
 - `goopencv-linux-arm64.so` for Linux `arm64`
 - `goopencv.dylib` as a universal macOS artifact

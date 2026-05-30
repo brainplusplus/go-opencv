@@ -4,8 +4,8 @@ import "errors"
 
 var (
 	// ErrBackendUnavailable means no native library was found for the current platform.
-	// Supported: windows/amd64, linux/amd64, linux/arm64, darwin/amd64, darwin/arm64.
-	ErrBackendUnavailable = errors.New("opencv: backend unavailable (supported: windows/amd64, linux/amd64, linux/arm64, darwin/amd64, darwin/arm64)")
+	// Supported: windows/amd64, windows/arm64, linux/amd64, linux/arm64, darwin/amd64, darwin/arm64.
+	ErrBackendUnavailable = errors.New("opencv: backend unavailable (supported: windows/amd64, windows/arm64, linux/amd64, linux/arm64, darwin/amd64, darwin/arm64)")
 
 	// ErrClosed means the runtime or object was already closed.
 	ErrClosed = errors.New("opencv: closed")
