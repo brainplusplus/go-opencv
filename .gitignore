@@ -9,14 +9,11 @@
 # Dist (DLL is embedded via go:embed — source is built from build-tools/)
 # Uncomment to exclude the DLL from git (large binary):
 # dist/goopencv.dll
-dist/goopencv.so
 dist/goopencv.dylib
-
-# Build WASI output
-build-wasi/
 
 # opencv-mobile SDK (large zip, extracted dir)
 build-tools/opencv-mobile-4.13.0-windows-vs2022/
+build-tools/opencv-mobile-*-ubuntu-*/
 build-tools/opencv-mobile-*.zip
 
 # References (internal design docs, not for public)

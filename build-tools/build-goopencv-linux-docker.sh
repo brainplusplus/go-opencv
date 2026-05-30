@@ -39,7 +39,7 @@ docker run --rm -v "$(pwd):/workspace" -w /workspace ubuntu:22.04 bash -c '
 
     echo "Compiling..."
     g++ -shared -O2 -fPIC -std=c++11 \
-        -I"${OPENCV_ROOT}/include" \
+        -I"${OPENCV_ROOT}/include/opencv4" \
         "${SOURCE}" \
         -o "${OUTPUT}" \
         -L"${OPENCV_ROOT}/lib" \
