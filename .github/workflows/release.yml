@@ -64,7 +64,7 @@ jobs:
         if: matrix.platform.name == 'linux-amd64'
         run: |
           wget -q https://github.com/nihui/opencv-mobile/releases/latest/download/opencv-mobile-${{ env.OPENCV_VERSION }}-ubuntu-2204.zip -O /tmp/opencv-mobile.zip
-          unzip -q /tmp/opencv-mobile.zip -d build-tools/
+          unzip -q -o /tmp/opencv-mobile.zip -d build-tools/
           rm /tmp/opencv-mobile.zip
 
       - name: Build goopencv.so (Linux amd64)
@@ -76,7 +76,7 @@ jobs:
         if: matrix.platform.name == 'linux-arm64'
         run: |
           wget -q https://github.com/nihui/opencv-mobile/releases/latest/download/opencv-mobile-${{ env.OPENCV_VERSION }}-debian-bookworm-aarch64.zip -O /tmp/opencv-mobile.zip
-          unzip -q /tmp/opencv-mobile.zip -d build-tools/
+          unzip -q -o /tmp/opencv-mobile.zip -d build-tools/
           rm /tmp/opencv-mobile.zip
 
       - name: Build goopencv.so (Linux arm64)
@@ -88,7 +88,7 @@ jobs:
         if: matrix.platform.name == 'macos-universal'
         run: |
           wget -q https://github.com/nihui/opencv-mobile/releases/latest/download/opencv-mobile-${{ env.OPENCV_VERSION }}-macos.zip -O /tmp/opencv-mobile.zip
-          unzip -q /tmp/opencv-mobile.zip -d build-tools/
+          unzip -q -o /tmp/opencv-mobile.zip -d build-tools/
           rm /tmp/opencv-mobile.zip
 
       - name: Build goopencv.dylib (macOS)

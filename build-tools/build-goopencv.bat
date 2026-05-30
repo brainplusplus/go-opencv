@@ -2,7 +2,7 @@
 REM Build goopencv.dll from goopencv_abi.cpp + opencv-mobile static libs
 REM Works both locally and in CI (GitHub Actions windows-2022 runner)
 
-setlocal enabledelayedexpable
+setlocal enabledelayedexpansion
 
 REM --- Detect repo root (parent of build-tools/) ---
 set "REPO_ROOT=%~dp0.."

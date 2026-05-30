@@ -15,7 +15,7 @@ OPENCV_URL="https://github.com/nihui/opencv-mobile/releases/latest/download/${OP
 if [ ! -d "build-tools/${OPENCV_PKG}" ]; then
     echo "=== Downloading ${OPENCV_PKG} ==="
     wget -q "${OPENCV_URL}" -O "/tmp/${OPENCV_PKG}.zip"
-    unzip -q "/tmp/${OPENCV_PKG}.zip" -d "build-tools/"
+    unzip -q -o "/tmp/${OPENCV_PKG}.zip" -d "build-tools/"
     rm "/tmp/${OPENCV_PKG}.zip"
     echo "Downloaded and extracted."
 fi
