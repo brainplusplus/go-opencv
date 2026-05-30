@@ -56,14 +56,14 @@ do
     fi
 done
 
-# Find headers
+# Find headers — prefer Versions/A/Headers (real directory) over symlinks
 HEADER_DIR=""
 for h_candidate in \
-    "${FRAMEWORK}/Headers" \
     "${FRAMEWORK}/Versions/A/Headers" \
-    "${FRAMEWORK}/Versions/Current/Headers"
+    "${FRAMEWORK}/Versions/Current/Headers" \
+    "${FRAMEWORK}/Headers"
 do
-    if [ -d "$h_candidate" ]; then
+    if [ -d "$h_candidate" ] && [ -f "${h_candidate}/core.hpp" ]; then
         HEADER_DIR="$h_candidate"
         break
     fi
