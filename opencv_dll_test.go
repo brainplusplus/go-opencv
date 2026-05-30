@@ -6,14 +6,32 @@ import (
 	"image/color"
 	"image/png"
 	"os"
+	"runtime"
 	"testing"
 )
 
-// dllPath returns the path to goopencv.dll if it exists, empty otherwise.
+// dllPath returns the native backend path for the current platform if it exists.
 func dllPath() string {
-	const p = "dist/goopencv.dll"
-	if _, err := os.Stat(p); err == nil {
-		return p
+	var candidates []string
+	switch runtime.GOOS {
+	case "windows":
+		candidates = []string{"dist/goopencv.dll"}
+	case "darwin":
+		candidates = []string{"dist/goopencv.dylib"}
+	case "linux":
+		if runtime.GOARCH == "arm64" {
+			candidates = []string{"dist/goopencv-linux-arm64.so", "dist/goopencv.so"}
+		} else {
+			candidates = []string{"dist/goopencv.so", "dist/goopencv-linux-arm64.so"}
+		}
+	default:
+		return ""
+	}
+
+	for _, p := range candidates {
+		if _, err := os.Stat(p); err == nil {
+			return p
+		}
 	}
 	return ""
 }
