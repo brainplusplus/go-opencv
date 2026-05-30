@@ -56,6 +56,11 @@ jobs:
           Expand-Archive "build-tools/$zip" -DestinationPath "build-tools/"
           Remove-Item "build-tools/$zip"
 
+      - name: Debug Windows SDK structure
+        if: matrix.platform.name == 'windows-amd64'
+        shell: cmd
+        run: dir /s /b build-tools\opencv-mobile-* | findstr /i "include lib" | findstr /v ".sh .bat"
+
       - name: Build goopencv.dll (Windows)
         if: matrix.platform.name == 'windows-amd64'
         shell: cmd

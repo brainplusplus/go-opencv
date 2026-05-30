@@ -22,13 +22,13 @@ if [ ! -d "build-tools/${OPENCV_PKG}" ]; then
     echo "Downloaded and extracted."
 fi
 
-# Find the framework — may be at different nesting levels
-# e.g., build-tools/PKG/opencv2.framework or build-tools/PKG/PKG/opencv2.framework
+# Find the framework — may be at different locations depending on zip structure
 FRAMEWORK=""
 for candidate in \
     "build-tools/${OPENCV_PKG}/opencv2.framework" \
     "build-tools/${OPENCV_PKG}/${OPENCV_PKG}/opencv2.framework" \
-    "build-tools/${OPENCV_PKG}/opencv-mobile-${OPENCV_VERSION}-macos/opencv2.framework"
+    "build-tools/${OPENCV_PKG}/opencv-mobile-${OPENCV_VERSION}-macos/opencv2.framework" \
+    "build-tools/opencv2.framework"
 do
     if [ -d "$candidate" ]; then
         FRAMEWORK="$candidate"
