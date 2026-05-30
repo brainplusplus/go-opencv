@@ -40,6 +40,22 @@ The project uses [nihui/opencv-mobile](https://github.com/nihui/opencv-mobile) *
 
 More detail lives in [SUPPORTED_PLATFORMS.md](SUPPORTED_PLATFORMS.md).
 
+## Install
+
+Add the module to your project:
+
+```bash
+go get github.com/brainplusplus/go-opencv@v0.3.1
+```
+
+Then import it in your code:
+
+```go
+import opencv "github.com/brainplusplus/go-opencv"
+```
+
+There is no separate native runtime installation step for supported platforms. The package embeds the platform-appropriate backend and extracts it automatically on first use.
+
 ## Quick start
 
 ```go
@@ -80,6 +96,25 @@ func main() {
 	cols, _ := blurred.Cols()
 	fmt.Printf("wrote output.png (%dx%d)\n", cols, rows)
 }
+```
+
+## Examples
+
+The repository includes runnable examples in [examples](/D:/golang/go-opencv/examples).
+
+From the repo root:
+
+```bash
+cd examples
+go run . -demo=all
+```
+
+Useful variants:
+
+```bash
+go run . -demo=basic
+go run . -demo=io -in sample.png -out output
+go run ./tools/gen-sample
 ```
 
 ## What you get
